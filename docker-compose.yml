@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # ==============================================================================
+  # Central PostgreSQL Service (Local Dev / Emulating PC 4)
+  # In Production, point POSTGRES_SERVER to PC 4's IP address.
+  # ==============================================================================
+  db:
+    image: postgres:16-alpine
+    container_name: vault-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vault}
+      POSTGRES_USER: ${POSTGRES_USER:-vault_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vault_secure_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vault_app} -d ${POSTGRES_DB:-vault}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vault-internal
+
+  # ==============================================================================
+  # FastAPI Application Backend Service
+  # ==============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: vault-backend:latest
+    container_name: vault-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PROJECT_NAME: "Vault"
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      SECRET_KEY: ${SECRET_KEY:-SUPER_SECRET_VAULT_KEY_2026_PROD_DEPLOYMENT}
+      POSTGRES_SERVER: ${POSTGRES_SERVER:-db}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-vault}
+      POSTGRES_USER: ${POSTGRES_USER:-vault_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vault_secure_password}
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      STORAGE_LOCAL_ROOT: /data/images
+      STORAGE_MAX_FILE_SIZE_MB: 25
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost,http://127.0.0.1}
+    volumes:
+      - image_storage:/data/images
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - vault-internal
+
+  # ==============================================================================
+  # Next.js Application Frontend Service
+  # ==============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: vault-frontend:latest
+    container_name: vault-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      INTERNAL_API_URL: http://backend:8000
+    networks:
+      - vault-internal
+
+  # ==============================================================================
+  # Nginx Reverse Proxy (Ingress Gateway)
+  # ==============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: vault-nginx
+    restart: unless-stopped
+    ports:
+      - "${VAULT_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - vault-internal
+
+volumes:
+  postgres_data:
+    name: vault_postgres_data
+  image_storage:
+    name: vault_image_storage
+
+networks:
+  vault-internal:
+    name: vault-network
+    driver: bridge

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAULT — Archival Negative & Print Repository</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            parchment: {
+              50: '#FDFBF7',
+              100: '#FAF6EE',
+              200: '#F4ECE0',
+              300: '#E8DCB8',
+              400: '#D5C3A5',
+              800: '#4A3D34',
+              900: '#2A221C',
+              950: '#1D1713'
+            },
+            brass: {
+              400: '#C79A59',
+              500: '#B28242',
+              600: '#94662B',
+              700: '#754D1B'
+            },
+            espresso: {
+              700: '#473A33',
+              800: '#342923',
+              900: '#231B16',
+              950: '#17110E'
+            }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            display: ['Cinzel', 'serif'],
+            mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8F5EE;
+      color: #2D2520;
+      background-image: 
+        radial-gradient(#E8E1D3 0.75px, transparent 0.75px), 
+        radial-gradient(#E8E1D3 0.75px, #F8F5EE 0.75px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+
+    .vintage-card {
+      background: #FFFDF9;
+      border: 1px solid #E5DDCF;
+      box-shadow: 0 2px 8px -1px rgba(74, 57, 43, 0.05), 0 1px 3px 0 rgba(74, 57, 43, 0.03);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vintage-card:hover {
+      border-color: #C79A59;
+      box-shadow: 0 16px 32px -6px rgba(74, 57, 43, 0.12), 0 4px 8px -2px rgba(74, 57, 43, 0.06);
+      transform: translateY(-3px);
+    }
+
+    .print-frame {
+      background: #FFFFFF;
+      box-shadow: inset 0 0 0 1px #E7E0D3, 0 4px 12px rgba(45, 37, 32, 0.08);
+      padding: 10px 10px 32px 10px;
+      transition: all 0.3s ease;
+    }
+    .print-frame:hover {
+      box-shadow: inset 0 0 0 1px #B28242, 0 12px 28px rgba(45, 37, 32, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .embossed-badge {
+      border: 1px solid #D5C8B4;
+      background: #F4EDE1;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(45, 37, 32, 0.04);
+    }
+
+    /* Subtle Paper Texture */
+    .paper-texture {
+      background-color: #FAF6ED;
+      border: 1px solid #E6DCCD;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-[#B28242] selection:text-white">
+
+  <!-- ================= CLEAN TOP MASTHEAD ================= -->
+  <header class="sticky top-0 z-40 w-full bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E5DCD0]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Navigation -->
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('gallery')">
+          <span class="font-serif text-xl font-bold tracking-wider text-[#2A221C]">VAULT</span>
+        </div>
+
+        <nav class="flex items-center gap-1 text-xs font-mono tracking-wider uppercase">
+          <button id="tab-gallery-btn" onclick="switchTab('gallery')" class="px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm">
+            Photos
+          </button>
+          <button id="tab-albums-btn" onclick="switchTab('albums')" class="px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
+            Albums
+          </button>
+          <button id="tab-settings-btn" onclick="switchTab('settings')" class="px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
+            Settings
+          </button>
+        </nav>
+      </div>
+
+      <!-- Right Controls: Search, Upload & User -->
+      <div class="flex items-center gap-3">
+        <div class="relative hidden sm:block w-48 md:w-60">
+          <svg class="w-3.5 h-3.5 text-[#8C7D6F] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input
+            id="search-input"
+            type="text"
+            oninput="handleSearch(this.value)"
+            placeholder="Search..."
+            class="w-full bg-[#F3ECE0] border border-[#DDD3C2] rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono text-[#2A221C] placeholder-[#8F8174] focus:outline-none focus:border-[#B28242] focus:bg-white transition"
+          />
+        </div>
+
+        <button
+          onclick="openUploadModal()"
+          class="flex items-center gap-1.5 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-[#7A5B36] transition shadow-sm active:scale-95"
+        >
+          <svg class="w-3.5 h-3.5 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Upload</span>
+        </button>
+
+        <div class="w-8 h-8 rounded-full bg-[#3D322B] text-[#F4ECE0] flex items-center justify-center font-serif text-xs font-bold border border-[#8C6D46] cursor-pointer" title="Alice Vault">
+          A
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= TAB: PHOTOGRAPHS GALLERY ================= -->
+  <main id="tab-gallery" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Clean Minimal Header -->
+    <div class="flex items-center justify-between pb-4 mb-6 border-b border-[#E6DDD0]">
+      <div class="flex items-baseline gap-3">
+        <h1 class="text-xl font-serif font-bold tracking-tight text-[#241D18]">
+          Photos
+        </h1>
+        <span id="photo-counter" class="text-xs font-mono text-[#8C7D6F]">
+          6 photos
+        </span>
+      </div>
+    </div>
+
+    <!-- Gallery Grid (Vintage Print Frames) -->
+    <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+      <!-- Dynamically filled by JS -->
+    </div>
+  </main>
+
+  <!-- ================= TAB: PORTFOLIOS (ALBUMS) ================= -->
+  <main id="tab-albums" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between pb-4 mb-6 border-b border-[#E6DDD0]">
+      <div class="flex items-baseline gap-3">
+        <h1 class="text-xl font-serif font-bold tracking-tight text-[#241D18]">
+          Albums
+        </h1>
+        <span class="text-xs font-mono text-[#8C7D6F]">2 albums</span>
+      </div>
+
+      <button onclick="alert('Create Album modal')" class="flex items-center gap-1.5 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-[#7A5B36] transition shadow-sm">
+        <svg class="w-3.5 h-3.5 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>New Album</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <!-- Portfolio 1 -->
+      <div class="vintage-card rounded-2xl p-6 cursor-pointer border-t-4 border-t-[#B28242]">
+        <div class="flex items-start justify-between">
+          <div class="w-12 h-12 rounded-xl bg-[#F0E7D8] border border-[#D5C8B4] flex items-center justify-center text-[#73522C]">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+          </div>
+          <span class="text-[10px] font-mono bg-[#EFE5D4] text-[#69584B] px-2 py-1 rounded border border-[#DCD1BF]">BOX NO. 14</span>
+        </div>
+        <h3 class="font-serif text-xl font-bold text-[#2A221C] mt-5">Data Centre Engineering (PC 1–4)</h3>
+        <p class="text-xs text-[#6F6054] mt-1.5 font-serif leading-relaxed">
+          Circuit diagrams, terminal logs, and rack hardware setup for the Proxmox private data centre cluster.
+        </p>
+        <div class="mt-6 pt-4 border-t border-[#EFE7D8] flex items-center justify-between text-xs font-mono text-[#7D6E62]">
+          <span>3 Plates Included</span>
+          <span class="text-[#94662B] font-semibold hover:underline">Inspect Binder →</span>
+        </div>
+      </div>
+
+      <!-- Portfolio 2 -->
+      <div class="vintage-card rounded-2xl p-6 cursor-pointer border-t-4 border-t-[#4A3D34]">
+        <div class="flex items-start justify-between">
+          <div class="w-12 h-12 rounded-xl bg-[#F0E7D8] border border-[#D5C8B4] flex items-center justify-center text-[#4A3D34]">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <span class="text-[10px] font-mono bg-[#EFE5D4] text-[#69584B] px-2 py-1 rounded border border-[#DCD1BF]">BOX NO. 29</span>
+        </div>
+        <h3 class="font-serif text-xl font-bold text-[#2A221C] mt-5">Classic Architecture & Optics</h3>
+        <p class="text-xs text-[#6F6054] mt-1.5 font-serif leading-relaxed">
+          Mechanical cameras, glass lenses, and physical switch installations recorded in high dynamic range.
+        </p>
+        <div class="mt-6 pt-4 border-t border-[#EFE7D8] flex items-center justify-between text-xs font-mono text-[#7D6E62]">
+          <span>3 Plates Included</span>
+          <span class="text-[#94662B] font-semibold hover:underline">Inspect Binder →</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= TAB: REGISTRY & CIPHER (SETTINGS) ================= -->
+  <main id="tab-settings" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 space-y-8">
+    <div class="border-b border-[#E1D7C6] pb-6">
+      <span class="text-[10px] font-mono uppercase tracking-widest text-[#9C754A] font-bold">
+        SECURITY REGISTRY
+      </span>
+      <h1 class="text-3xl font-serif font-bold tracking-tight text-[#241D18]">
+        Archival Registry & Cryptography Parameters
+      </h1>
+      <p class="text-xs text-[#6F6054] font-serif italic mt-1">
+        Argon2id Memory-Hard Cipher & Server-Side Tenancy Isolation
+      </p>
+    </div>
+
+    <!-- Telemetry Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="paper-texture p-5 rounded-2xl">
+        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Volume Consumption</span>
+        <p class="text-3xl font-serif font-bold text-[#241D18]">48.50 MB</p>
+        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Mounted on PC 3 (/data/images)</p>
+      </div>
+      <div class="paper-texture p-5 rounded-2xl">
+        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Cataloged Plates</span>
+        <p class="text-3xl font-serif font-bold text-[#241D18]">6 Plates</p>
+        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Zero BOLA Leaks to Bob</p>
+      </div>
+      <div class="paper-texture p-5 rounded-2xl">
+        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Hash Verification</span>
+        <p class="text-3xl font-serif font-bold text-[#94662B]">Argon2id</p>
+        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">RFC 9106 Standard (64MB RAM)</p>
+      </div>
+    </div>
+
+    <!-- Tenant Credentials Form -->
+    <div class="vintage-card p-8 rounded-2xl">
+      <h3 class="font-serif text-xl font-bold text-[#2A221C] mb-1">Tenant Archival Passport</h3>
+      <p class="text-xs text-[#6F6054] font-serif italic mb-6">Derived strictly from JWT signature tokens — client user_ids are never trusted.</p>
+      
+      <div class="space-y-4 text-xs font-mono max-w-lg">
+        <div>
+          <label class="block text-[#6F6054] mb-1">TENANT RECORD IDENTIFIER (UUID)</label>
+          <input type="text" disabled value="edc566e6-a811-4116-b6a3-1f35a6de1dbf" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-[#6F6054] mb-1">REGISTERED ARCHIVIST EMAIL</label>
+          <input type="text" disabled value="alice@vault.internal" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-[#6F6054] mb-1">CALL SIGN / FULL NAME</label>
+          <input type="text" value="Alice Vault" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
+        </div>
+        <button onclick="alert('Passport details updated successfully.')" class="mt-2 px-5 py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
+          Update Passport
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= VINTAGE SLIDE LIGHTBOX MODAL ================= -->
+  <div id="viewer-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-[#17120F]/95 backdrop-blur-xl select-none animate-in fade-in">
+    
+    <!-- Top Loupe Controls Bar -->
+    <div class="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#17120F] to-transparent flex items-center justify-between px-6 z-20 border-b border-[#3A2E26]">
+      <div class="flex items-center gap-4">
+        <button onclick="closeViewer()" class="p-2 text-[#D5C3A5] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Close (Esc)">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div>
+          <h4 id="viewer-title" class="text-sm font-serif font-bold text-[#F4ECE0] truncate">Plate</h4>
+          <p id="viewer-counter" class="text-[11px] font-mono text-[#A89889]">PLATE NO. 1 OF 6</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="toggleZoom()" class="p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Loupe Magnifier">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+        </button>
+        <button onclick="toggleInfoDrawer()" class="p-2 text-[#C79A59] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Archival Ledger (I)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </button>
+        <button onclick="alert('Downloading authenticated master file...')" class="p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Export Master File">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        </button>
+        <button onclick="deleteActiveImage()" class="p-2 text-[#D5C3A5] hover:text-rose-400 bg-[#2A221C] hover:bg-rose-950/40 rounded-xl border border-[#524136] transition" title="Incinerate / Delete">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Archival Mount -->
+    <div class="relative w-full h-full flex items-center justify-center p-6 sm:p-12 overflow-hidden">
+      <div class="bg-white p-3 sm:p-4 rounded-xl shadow-2xl border border-[#3A2E26] max-h-[85vh] max-w-[90vw] flex flex-col items-center">
+        <img id="viewer-img" src="" alt="" class="max-h-[75vh] object-contain rounded transition-transform duration-300 cursor-zoom-in" onclick="toggleZoom()">
+        <span id="viewer-caption" class="text-[11px] font-mono text-[#5C4D41] mt-2 tracking-wider uppercase"></span>
+      </div>
+
+      <button onclick="navigateViewer(-1)" class="absolute left-6 top-1/2 -translate-y-1/2 p-3 text-[#EFE7D8] bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="navigateViewer(1)" class="absolute right-6 top-1/2 -translate-y-1/2 p-3 text-[#EFE7D8] bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- Slide-out Archival Ledger Drawer -->
+    <div id="info-drawer" class="absolute right-0 top-16 bottom-0 w-80 sm:w-96 bg-[#211A16] border-l border-[#42342A] text-[#EFE7D8] p-6 overflow-y-auto z-30 transition-transform translate-x-full duration-300">
+      <div class="flex items-center justify-between pb-4 border-b border-[#42342A]">
+        <h3 class="font-serif font-bold text-[#F4ECE0] flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#C79A59]"></span>
+          Archival Dossier
+        </h3>
+        <button onclick="toggleInfoDrawer()" class="text-[#A89889] hover:text-white text-xs font-mono">✕ CLOSE</button>
+      </div>
+
+      <div class="mt-6 space-y-4 text-xs font-mono">
+        <div>
+          <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-1">Catalog Filename</span>
+          <p id="meta-filename" class="font-semibold text-[#F4ECE0] break-all"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="p-3 rounded-xl bg-[#2A221C] border border-[#4A3D34]">
+            <span class="text-[10px] text-[#8F8174] block mb-1">FILE WEIGHT</span>
+            <p id="meta-size" class="font-bold text-[#D5C3A5]"></p>
+          </div>
+          <div class="p-3 rounded-xl bg-[#2A221C] border border-[#4A3D34]">
+            <span class="text-[10px] text-[#8F8174] block mb-1">EMULSION</span>
+            <p id="meta-format" class="font-bold text-[#D5C3A5] uppercase"></p>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-1">Pixel Matrix</span>
+          <p id="meta-dims" class="font-semibold text-[#F4ECE0]"></p>
+        </div>
+
+        <div>
+          <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-1">SHA-256 Digital Fingerprint</span>
+          <code id="meta-hash" class="text-[10px] bg-[#17110E] p-2.5 rounded-lg border border-[#3A2E26] text-[#C79A59] block break-all leading-relaxed"></code>
+        </div>
+
+        <div class="pt-4 border-t border-[#42342A]">
+          <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-2">Preservation Guarantees</span>
+          <div class="p-3.5 rounded-xl bg-[#2A221C] border border-[#6E5432] text-[11px] text-[#D5C3A5] leading-relaxed font-sans">
+            ✓ Strictly quarantined to Alice's UID folder.<br>
+            ✓ Disallowed from raw public web traversal.<br>
+            ✓ Geolocation EXIF telemetry expunged.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DARKROOM NEGATIVE INGESTION MODAL ================= -->
+  <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
+    <div class="w-full max-w-2xl bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="px-6 py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
+            +
+          </div>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-[#2A221C]">Plate Ingestion & Darkroom Processing</h3>
+            <p class="text-xs text-[#7A6B5F] font-serif italic">Sanitizes EXIF telemetry and synthesizes WebP contact miniatures.</p>
+          </div>
+        </div>
+        <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto">
+        <div onclick="simulateUpload()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition">
+          <div class="w-12 h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-3 text-[#94662B]">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          </div>
+          <p class="font-serif text-base font-semibold text-[#2A221C]">
+            Click to expose and ingest camera negatives
+          </p>
+          <p class="text-xs font-mono text-[#8C7B6D] mt-1">
+            Accepts JPEG, PNG, WebP, GIF • Up to 25MB per plate
+          </p>
+        </div>
+
+        <div id="upload-queue-container" class="space-y-2">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <span class="text-xs font-mono text-[#8C7B6D]">STORAGE QUOTA: 80% REMAINING</span>
+        <button onclick="closeUploadModal()" class="px-5 py-2 text-xs font-mono uppercase tracking-wider bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] rounded-xl transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DATA & JAVASCRIPT ================= -->
+  <script>
+    const vintageImages = [
+      {
+        id: "plate-01",
+        title: "leica_m3_rangefinder_1954.jpg",
+        caption: "Leica M3 Rangefinder Camera with Summicron 50mm Lens // 35mm Film Exposure",
+        size: "4.8 MB",
+        dims: "3840 × 2160",
+        format: "JPEG (FINE GRAIN)",
+        hash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+        url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        id: "plate-02",
+        title: "analog_darkroom_enlarger.jpg",
+        caption: "Silver Gelatin Darkroom Enlarger under Amber Safelight // Archival Print",
+        size: "3.4 MB",
+        dims: "2800 × 1800",
+        format: "JPEG (SEPIA TONE)",
+        hash: "9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca7",
+        url: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        id: "plate-03",
+        title: "monochrome_street_archive_rome.png",
+        caption: "Via Condotti Piazza di Spagna // Monochromatic Negative Plate #401",
+        size: "5.7 MB",
+        dims: "4096 × 2730",
+        format: "PNG (16-BIT GRAYSCALE)",
+        hash: "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+        url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        id: "plate-04",
+        title: "datacenter_switch_rack_vintage.jpg",
+        caption: "PC 3 Server Switch Matrix // Fiber Patch Bay Installation 1984",
+        size: "2.9 MB",
+        dims: "2400 × 1600",
+        format: "JPEG",
+        hash: "112122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+        url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        id: "plate-05",
+        title: "olympus_om1_mechanical_optics.jpg",
+        caption: "Olympus OM-1 Mechanical Shutter Assembly // Technical Macro Exposure",
+        size: "4.1 MB",
+        dims: "3000 × 2000",
+        format: "JPEG (EKTAPRO 100)",
+        hash: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        url: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        id: "plate-06",
+        title: "archival_leather_ledger_vault.jpg",
+        caption: "Bound Parchment Ledger of Cryptographic Public Keys // National Archive",
+        size: "3.8 MB",
+        dims: "2500 × 1667",
+        format: "JPEG (MATTE COATED)",
+        hash: "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+        url: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80"
+      }
+    ];
+
+    let currentImages = [...vintageImages];
+    let activeIndex = 0;
+    let isZoomed = false;
+    let infoOpen = false;
+
+    function renderGallery(imagesToRender) {
+      const grid = document.getElementById("image-grid");
+      grid.innerHTML = "";
+
+      if (imagesToRender.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center font-serif text-[#8C7B6D]">
+            No corresponding negatives found in the current archival binder.
+          </div>
+        `;
+        return;
+      }
+
+      imagesToRender.forEach((img, idx) => {
+        const frame = document.createElement("div");
+        frame.className = "print-frame rounded-lg cursor-pointer select-none group";
+        frame.onclick = () => openViewer(idx);
+
+        frame.innerHTML = `
+          <div class="overflow-hidden rounded aspect-[4/3] bg-[#EFE7D8] relative">
+            <img src="${img.url}" alt="${img.title}" loading="lazy" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
+            <div class="absolute top-2.5 right-2.5 bg-[#2A221C]/80 text-[#F4ECE0] font-mono text-[9px] px-2 py-0.5 rounded border border-[#755D49] tracking-wider uppercase">
+              ${img.format.split(" ")[0]}
+            </div>
+          </div>
+          <div class="mt-3 px-1 flex flex-col">
+            <h4 class="font-serif font-bold text-sm text-[#2A221C] group-hover:text-[#94662B] transition truncate">${img.title}</h4>
+            <p class="font-serif italic text-xs text-[#7A6A5E] mt-0.5 line-clamp-1">${img.caption}</p>
+            <div class="mt-2.5 pt-2 border-t border-[#EFE7D8] flex items-center justify-between text-[10px] font-mono text-[#8C7B6D]">
+              <span>${img.dims}</span>
+              <span>${img.size}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(frame);
+      });
+
+      document.getElementById("photo-counter").innerText = `${imagesToRender.length} photos`;
+    }
+
+    function handleSearch(val) {
+      const q = val.toLowerCase().trim();
+      const filtered = vintageImages.filter(i => 
+        i.title.toLowerCase().includes(q) || 
+        i.caption.toLowerCase().includes(q) ||
+        i.format.toLowerCase().includes(q)
+      );
+      renderGallery(filtered);
+    }
+
+    function switchTab(tab) {
+      document.getElementById("tab-gallery").classList.add("hidden");
+      document.getElementById("tab-albums").classList.add("hidden");
+      document.getElementById("tab-settings").classList.add("hidden");
+
+      const inactive = "px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]";
+      const active = "px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm";
+
+      document.getElementById("tab-gallery-btn").className = inactive;
+      document.getElementById("tab-albums-btn").className = inactive;
+      document.getElementById("tab-settings-btn").className = inactive;
+
+      if (tab === 'gallery') {
+        document.getElementById("tab-gallery").classList.remove("hidden");
+        document.getElementById("tab-gallery-btn").className = active;
+      } else if (tab === 'albums') {
+        document.getElementById("tab-albums").classList.remove("hidden");
+        document.getElementById("tab-albums-btn").className = active;
+      } else if (tab === 'settings') {
+        document.getElementById("tab-settings").classList.remove("hidden");
+        document.getElementById("tab-settings-btn").className = active;
+      }
+    }
+
+    function openViewer(idx) {
+      activeIndex = idx;
+      const img = currentImages[activeIndex];
+      document.getElementById("viewer-modal").classList.remove("hidden");
+      updateViewerContent(img);
+    }
+
+    function updateViewerContent(img) {
+      document.getElementById("viewer-img").src = img.url;
+      document.getElementById("viewer-title").innerText = img.title;
+      document.getElementById("viewer-caption").innerText = img.caption;
+      document.getElementById("viewer-counter").innerText = `PLATE NO. ${activeIndex + 1} OF ${currentImages.length}`;
+
+      document.getElementById("meta-filename").innerText = img.title;
+      document.getElementById("meta-size").innerText = img.size;
+      document.getElementById("meta-format").innerText = img.format;
+      document.getElementById("meta-dims").innerText = `${img.dims} pixels`;
+      document.getElementById("meta-hash").innerText = img.hash;
+    }
+
+    function closeViewer() {
+      document.getElementById("viewer-modal").classList.add("hidden");
+      isZoomed = false;
+      document.getElementById("viewer-img").classList.remove("scale-150");
+    }
+
+    function navigateViewer(dir) {
+      activeIndex = (activeIndex + dir + currentImages.length) % currentImages.length;
+      updateViewerContent(currentImages[activeIndex]);
+    }
+
+    function toggleZoom() {
+      isZoomed = !isZoomed;
+      const img = document.getElementById("viewer-img");
+      if (isZoomed) {
+        img.classList.add("scale-150");
+      } else {
+        img.classList.remove("scale-150");
+      }
+    }
+
+    function toggleInfoDrawer() {
+      infoOpen = !infoOpen;
+      const drawer = document.getElementById("info-drawer");
+      if (infoOpen) {
+        drawer.classList.remove("translate-x-full");
+      } else {
+        drawer.classList.add("translate-x-full");
+      }
+    }
+
+    function deleteActiveImage() {
+      if (confirm(`Incinerate negative plate ${currentImages[activeIndex].title} permanently?`)) {
+        currentImages.splice(activeIndex, 1);
+        closeViewer();
+        renderGallery(currentImages);
+      }
+    }
+
+    function openUploadModal() {
+      document.getElementById("upload-modal").classList.remove("hidden");
+    }
+
+    function closeUploadModal() {
+      document.getElementById("upload-modal").classList.add("hidden");
+    }
+
+    function simulateUpload() {
+      const container = document.getElementById("upload-queue-container");
+      container.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-[#F8F4EB] border border-[#D5C9B4] flex items-center justify-between text-xs font-mono animate-pulse">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#3A2E26] text-[#D5C3A5] flex items-center justify-center font-bold">RAW</div>
+            <div>
+              <p class="font-semibold text-[#2A221C]">leica_negative_exposure_09.png</p>
+              <p class="text-[10px] text-[#94662B]">Developing emulsion 68% • Stripping camera GPS tag...</p>
+            </div>
+          </div>
+          <span class="text-[#7A6B5F]">2.4 MB</span>
+        </div>
+      `;
+
+      setTimeout(() => {
+        container.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-[#F0F5EB] border border-[#B3C8A4] flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-[#2E4522] text-[#E0EED4] flex items-center justify-center font-bold">✓</div>
+              <div>
+                <p class="font-semibold text-[#203118]">leica_negative_exposure_09.png</p>
+                <p class="text-[10px] text-[#4E6F3B]">Acid-Free Ingested • Archival miniature generated</p>
+              </div>
+            </div>
+            <span class="text-[#2E4522] font-semibold">Done</span>
+          </div>
+        `;
+      }, 1200);
+    }
+
+    // Keyboard listener
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeViewer();
+      if (e.key === "ArrowLeft") navigateViewer(-1);
+      if (e.key === "ArrowRight") navigateViewer(1);
+    });
+
+    // Initial render
+    renderGallery(currentImages);
+  </script>
+</body>
+</html>
