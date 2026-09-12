@@ -386,23 +386,73 @@
           </div>
           <div>
             <h3 class="font-serif text-lg font-bold text-[#2A221C]">Plate Ingestion & Darkroom Processing</h3>
-            <p class="text-xs text-[#7A6B5F] font-serif italic">Sanitizes EXIF telemetry and synthesizes WebP contact miniatures.</p>
+            <p class="text-xs text-[#7A6B5F] font-serif italic">Upload negatives from your photo gallery or expose live using camera.</p>
           </div>
         </div>
         <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
       </div>
 
+      <!-- Mode Selector: Gallery vs Camera -->
+      <div class="px-6 pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
+        <button id="upload-tab-gallery" onclick="switchUploadTab('gallery')" class="px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
+          From Gallery / Files
+        </button>
+        <button id="upload-tab-camera" onclick="switchUploadTab('camera')" class="px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
+          Take Photo (Camera)
+        </button>
+      </div>
+
       <div class="p-6 space-y-5 overflow-y-auto">
-        <div onclick="simulateUpload()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition">
-          <div class="w-12 h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-3 text-[#94662B]">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        <!-- Gallery Mode -->
+        <div id="upload-mode-gallery" class="space-y-4">
+          <div onclick="document.getElementById('gallery-file-input').click()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition">
+            <div class="w-12 h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-3 text-[#94662B]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <p class="font-serif text-base font-semibold text-[#2A221C]">
+              Select photographs from your Gallery
+            </p>
+            <p class="text-xs font-mono text-[#8C7B6D] mt-1">
+              Browse photo library or drag & drop files • JPEG, PNG, WebP
+            </p>
+            <input id="gallery-file-input" type="file" multiple accept="image/*" class="hidden" onchange="handleGalleryFileInput(this.files)" />
           </div>
-          <p class="font-serif text-base font-semibold text-[#2A221C]">
-            Click to expose and ingest camera negatives
-          </p>
-          <p class="text-xs font-mono text-[#8C7B6D] mt-1">
-            Accepts JPEG, PNG, WebP, GIF • Up to 25MB per plate
-          </p>
+        </div>
+
+        <!-- Camera Mode -->
+        <div id="upload-mode-camera" class="hidden space-y-4">
+          <div class="relative rounded-2xl overflow-hidden bg-[#17120F] aspect-video border border-[#3A2E26] flex items-center justify-center">
+            <video id="camera-video-preview" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+
+            <div id="camera-placeholder" class="text-center p-6 space-y-3">
+              <div class="w-12 h-12 rounded-xl bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <p class="text-xs font-mono text-[#A89889]">Optical camera shutter currently disengaged</p>
+              <div class="flex items-center justify-center gap-2 pt-2">
+                <button onclick="startLiveCamera()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1D1713] text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#7A5B36] transition">
+                  Start Live Camera
+                </button>
+                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-4 py-2 bg-[#B28242] hover:bg-[#94662B] text-xs font-mono text-white rounded-xl transition">
+                  Open Device Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Shutter Overlay -->
+            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-4 flex items-center justify-center gap-4 px-4 z-10">
+              <button onclick="captureCameraPlate()" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FAF6EE] text-[#2A221C] font-mono uppercase tracking-wider text-xs font-bold shadow-2xl hover:bg-white transition active:scale-95 border border-[#8C6D46]">
+                <span class="w-3 h-3 rounded-full bg-rose-600 animate-pulse"></span>
+                <span>Expose Plate</span>
+              </button>
+              <button onclick="stopLiveCamera()" class="p-2.5 rounded-full bg-[#17120F]/80 text-[#D5C3A5] hover:text-white border border-[#42342A] transition" title="Stop Camera">
+                ✕
+              </button>
+            </div>
+
+            <canvas id="camera-capture-canvas" class="hidden"></canvas>
+            <input id="mobile-camera-input" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleMobileCameraInput(this.files)" />
+          </div>
         </div>
 
         <div id="upload-queue-container" class="space-y-2">
@@ -622,43 +672,136 @@
       }
     }
 
+    let cameraStream = null;
+
+    function switchUploadTab(tab) {
+      const tabGallery = document.getElementById("upload-tab-gallery");
+      const tabCamera = document.getElementById("upload-tab-camera");
+      const modeGallery = document.getElementById("upload-mode-gallery");
+      const modeCamera = document.getElementById("upload-mode-camera");
+
+      if (tab === "gallery") {
+        stopLiveCamera();
+        tabGallery.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition";
+        tabCamera.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition";
+        modeGallery.classList.remove("hidden");
+        modeCamera.classList.add("hidden");
+      } else {
+        tabCamera.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition";
+        tabGallery.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition";
+        modeCamera.classList.remove("hidden");
+        modeGallery.classList.add("hidden");
+        startLiveCamera();
+      }
+    }
+
+    async function startLiveCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        cameraStream = stream;
+        const video = document.getElementById("camera-video-preview");
+        video.srcObject = stream;
+        video.classList.remove("hidden");
+        document.getElementById("camera-placeholder").classList.add("hidden");
+        document.getElementById("camera-controls-overlay").classList.remove("hidden");
+      } catch (err) {
+        console.warn("Live camera stream error:", err);
+        alert("Camera preview unavailable or permission denied. You can still use 'Open Device Camera' on mobile.");
+      }
+    }
+
+    function stopLiveCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      const video = document.getElementById("camera-video-preview");
+      if (video) video.classList.add("hidden");
+      const placeholder = document.getElementById("camera-placeholder");
+      if (placeholder) placeholder.classList.remove("hidden");
+      const controls = document.getElementById("camera-controls-overlay");
+      if (controls) controls.classList.add("hidden");
+    }
+
+    function captureCameraPlate() {
+      const video = document.getElementById("camera-video-preview");
+      const canvas = document.getElementById("camera-capture-canvas");
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+
+      const newPlate = {
+        id: `plate-${Date.now()}`,
+        title: `camera_exposure_${currentImages.length + 1}.jpg`,
+        caption: "Live Optical Camera Exposure // Sanitized Silver Halide Emulsion",
+        size: "2.8 MB",
+        dims: `${canvas.width} × ${canvas.height}`,
+        format: "JPEG (LIVE CAPTURE)",
+        hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        url: dataUrl
+      };
+
+      currentImages.unshift(newPlate);
+      renderGallery(currentImages);
+      stopLiveCamera();
+
+      const container = document.getElementById("upload-queue-container");
+      container.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-[#F0F5EB] border border-[#B3C8A4] flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#2E4522] text-[#E0EED4] flex items-center justify-center font-bold">✓</div>
+            <div>
+              <p class="font-semibold text-[#203118]">${newPlate.title}</p>
+              <p class="text-[10px] text-[#4E6F3B]">Captured & Ingested into Gallery</p>
+            </div>
+          </div>
+          <span class="text-[#2E4522] font-semibold">Done</span>
+        </div>
+      `;
+
+      setTimeout(() => {
+        closeUploadModal();
+        container.innerHTML = "";
+      }, 1000);
+    }
+
+    function handleGalleryFileInput(files) {
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach((file, idx) => {
+        const url = URL.createObjectURL(file);
+        const newPlate = {
+          id: `plate-${Date.now()}-${idx}`,
+          title: file.name,
+          caption: "Uploaded from Gallery // EXIF GPS Telemetry Stripped",
+          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+          dims: "High Dynamic Range",
+          format: file.type.split("/")[1].toUpperCase(),
+          hash: "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e",
+          url: url
+        };
+        currentImages.unshift(newPlate);
+      });
+      renderGallery(currentImages);
+      closeUploadModal();
+    }
+
+    function handleMobileCameraInput(files) {
+      if (!files || files.length === 0) return;
+      handleGalleryFileInput(files);
+    }
+
     function openUploadModal() {
       document.getElementById("upload-modal").classList.remove("hidden");
     }
 
     function closeUploadModal() {
+      stopLiveCamera();
       document.getElementById("upload-modal").classList.add("hidden");
-    }
-
-    function simulateUpload() {
-      const container = document.getElementById("upload-queue-container");
-      container.innerHTML = `
-        <div class="p-3.5 rounded-xl bg-[#F8F4EB] border border-[#D5C9B4] flex items-center justify-between text-xs font-mono animate-pulse">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[#3A2E26] text-[#D5C3A5] flex items-center justify-center font-bold">RAW</div>
-            <div>
-              <p class="font-semibold text-[#2A221C]">leica_negative_exposure_09.png</p>
-              <p class="text-[10px] text-[#94662B]">Developing emulsion 68% • Stripping camera GPS tag...</p>
-            </div>
-          </div>
-          <span class="text-[#7A6B5F]">2.4 MB</span>
-        </div>
-      `;
-
-      setTimeout(() => {
-        container.innerHTML = `
-          <div class="p-3.5 rounded-xl bg-[#F0F5EB] border border-[#B3C8A4] flex items-center justify-between text-xs font-mono">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-[#2E4522] text-[#E0EED4] flex items-center justify-center font-bold">✓</div>
-              <div>
-                <p class="font-semibold text-[#203118]">leica_negative_exposure_09.png</p>
-                <p class="text-[10px] text-[#4E6F3B]">Acid-Free Ingested • Archival miniature generated</p>
-              </div>
-            </div>
-            <span class="text-[#2E4522] font-semibold">Done</span>
-          </div>
-        `;
-      }, 1200);
     }
 
     // Keyboard listener
