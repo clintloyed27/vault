@@ -239,15 +239,35 @@ These credentials exist in Jenkins (`PC1:8080`) under System Credentials:
 - **Cause:** On Proxmox host kernels, unprivileged process capability restrictions prevented Nginx master from executing `socketpair()` to create IPC channels for worker processes. No workers could be spawned to handle connections.
 - **Fix:** Configured `master_process off;` in `/etc/nginx/nginx.conf` and mapped `-p 8080:80` with `--privileged`. Nginx runs cleanly in single-process mode, serving requests instantly.
 
+### Finding 6: Nexus Port 8082 Returns "Not a docker request" in Web Browsers
+- **Symptom:** Visiting `http://172.16.20.103:8082` in a regular web browser displays `400 Not a docker request`.
+- **Cause:** Port 8082 is Sonatype Nexus's dedicated **Docker Registry V2 API Connector** (`registry-docker-hosted`). It only accepts Docker daemon HTTP requests with standard Docker headers (e.g. `docker pull`, `docker push`, `GET /v2/...`). Web browsers send standard HTML `GET /` requests, so Nexus responds with `Not a docker request`.
+- **Proof of Health:** Direct Docker V2 API query `GET http://172.16.20.103:8082/v2/server2026-test/tags/list` with credentials returns HTTP 200 with all tags (`["18", ..., "37", "38"]`).
+- **Web UI Access:** The Nexus Web GUI is on **port 8081**: `http://172.16.20.103:8081/`.
+
+### Finding 7: SonarQube Dashboard Shows Quality Gate "FAILED"
+- **Symptom:** SonarQube dashboard for project `server2026` shows a red "FAILED" status.
+- **Cause:** SonarQube applies the default "Sonar way" Quality Gate, which enforces **>= 80.0% Coverage on New Code**. Because the pipeline scanner runs `sonar-scanner -Dsonar.sources=.` without a test coverage report, the coverage metric is calculated as 0.0%, triggering an automatic Quality Gate failure.
+- **Pipeline Handling:** The Jenkins pipeline explicitly handles this in `stage('Code Quality - SonarQube (Optional)')` by wrapping the scanner execution with `|| true` and `try { ... } catch (Exception e) { ... }`. This allows the pipeline to gather static analysis metrics while safely continuing to build, push to Nexus, and deploy to PC3.
+
+### Finding 8: Uploaded Photo Plates Disappearing on Page Refresh
+- **Symptom:** Uploading a picture displays it in the gallery, but refreshing the browser (F5) reverts to the 6 default vintage photos.
+- **Cause:** Previously, `handleGalleryFileInput` loaded files using `URL.createObjectURL(file)` into a temporary in-memory JavaScript array (`currentImages`). In-memory variables and blob URLs are ephemeral and are destroyed when the page reloads.
+- **Resolution:** Replaced ephemeral blob URLs with an asynchronous **IndexedDB persistence engine** (`VaultArchiveDB`, store `uploaded_plates`) with automatic fallback to `localStorage`.
+  - When photos are uploaded or captured via camera, they are converted to Base64 Data URLs and stored in IndexedDB.
+  - On page load, `initVault()` fetches all saved plates and prepends them to the gallery.
+  - `deleteActiveImage()` permanently removes deleted plates from IndexedDB.
+  - `handleSearch()` queries across both user plates and default plates.
+
 ---
 
-## 8. Verified Live Deployment (Build #36)
+## 8. Verified Live Deployment (Build #38)
 
 The entire automated CI/CD loop has completed with **SUCCESS**:
 
-1. **Source Code:** Vault codebase pushed to Gitea (`http://172.16.20.100:3000/root/server2026-test.git`).
-2. **CI Automation:** Jenkins on PC1 (`http://172.16.20.101:8080`) checked out commit `daa1c2c`, performed SonarQube quality analysis (`http://172.16.20.102:9000`), packaged the build artifact, and uploaded it to Nexus (`http://172.16.20.103:8081`).
-3. **Container Delivery:** PC3 built the production container `server2026-test:36` with `--no-cache`, pushed it to Nexus Docker Registry (`172.16.20.103:8082`), and deployed container `server2026-web`.
-4. **Live Verification:** HTTP probe returned **HTTP/1.1 200 OK** (`Content-Length: 42153`).
-5. **Live URL:** **`http://172.16.20.12:8080`** (Accessible from all machines on the `172.16.20.0/24` LAN).
+1. **Source Code:** Vault codebase with persistent IndexedDB storage pushed to Gitea (`http://172.16.20.100:3000/root/server2026-test.git`, commit `68eb201`).
+2. **CI Automation:** Jenkins on PC1 (`http://172.16.20.101:8080`) checked out commit `68eb201`, ran SonarQube scanner, packaged build artifact, and uploaded it to Nexus repository (`http://172.16.20.103:8081`).
+3. **Container Delivery:** PC3 built container `server2026-test:38`, pushed tag `38` to Nexus Docker Registry (`172.16.20.103:8082`), and deployed container `server2026-web`.
+4. **Live Verification:** HTTP probe returned **HTTP/1.1 200 OK** (`Content-Length: 48487`).
+5. **Live URL:** **`http://172.16.20.12:8080`** (Accessible across the entire `172.16.20.0/24` cluster).
 
