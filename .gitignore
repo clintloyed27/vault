@@ -54,3 +54,10 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Scratch and Build Artifacts
+\#*.txt
+b64.txt
+jenkins_job_config.xml
+server2026-test/
+
