@@ -418,3 +418,48 @@ The reverse proxy and Cloudflare Tunnel infrastructure on PC3 is **100% locked i
    - Preserves public guest viewing when `ALLOW_PUBLIC_GALLERY=true` while guaranteeing multi-tenant isolation when authenticated.
 3. **Verification:**
    - All 16 automated backend unit tests passing (`backend/tests`).
+
+---
+
+## 15. Verified Live Deployment: Build #45 (September 28, 2026)
+
+The entire automated pipeline executed with **SUCCESS**:
+
+1. **Source Control:**
+   - Fixed `.gitignore` (unignored `backend/app/storage/` Python package).
+   - Pulled friend's latest updates from `https://github.com/clintloyed27/vault` (Commit `7852d35`: User sign-up/login modal, multi-tenant scoping, camera Permissions-Policy).
+   - Synced to both `gitea` (`server2026-test.git`) and `github` (`gitruparel/photo-vault.git`).
+2. **Jenkins Automation (PC1 `172.16.20.101:8080`):**
+   - **Build #45:** Ran checkout, SonarQube scan, artifact upload to Nexus, Docker build, and pushed `172.16.20.103:8082/server2026-test:45` to Nexus Docker Registry.
+   - **Deploy on PC3:** Deployed container `server2026-web` attached to `--network network_tunnel-net` with persistent host volume `-v /data/apps/server2026/storage:/data/storage` in privileged mode.
+   - **Container Health:** Up and healthy (`docker ps` shows `Up (healthy)` on PC3).
+3. **Live Public Domain Verification:**
+   - **URL:** **`https://vault.swayamruparel.com`** is LIVE!
+   - HTTP 200 response serving the complete Vault archival web UI via Cloudflare Tunnel and Nginx Proxy Manager.
+   - Health check: `GET https://vault.swayamruparel.com/health` returns `{"status": "healthy", "service": "Vault", "version": "1.0.0"}`.
+
+---
+
+## 16. Live PostgreSQL Database Integration (PC4 CT106: `172.16.20.106:5432`)
+
+- **Database:** `vault`
+- **Role / User:** `vault_app` (Password: `sm_khot88`)
+- **Network Permissions:** `pg_hba.conf` configured with `host all all 172.16.20.0/24 md5` and `scram-sha-256`.
+- **Schema & Tables:** Initialized via SQLAlchemy metadata (`users`, `images`, `albums`, `refresh_tokens`).
+- **Live Authentication Verified:**
+  - Account registration tested via `POST /api/v1/auth/register` (HTTP 201).
+  - Login tested via `POST /api/v1/auth/login` (HTTP 200, JWT token returned).
+  - Confirmed new user records are physically stored in PostgreSQL table `users` on PC4.
+
+---
+
+## 17. Datacentre Storage Status & Next Session Roadmap
+
+1. **Backend Storage API Verified:**
+   - Image upload via API (`POST /api/v1/images/upload` with form field `files`) was tested and verified live on `https://vault.swayamruparel.com`.
+   - The test image was successfully written to the PC3 host disk mount (`/data/apps/server2026/storage/images/`) and registered in PostgreSQL.
+2. **Observation for Frontend Web Ingestion:**
+   - In `index.html` / `preview.html`, when a user uploads without signing in, the frontend currently falls back to storing in the browser's IndexedDB.
+   - When the user signs in with their account via the `[Sign In]` modal, the frontend attaches the Bearer token and uploads directly to the datacentre backend API.
+   - **Next Session Item:** Wire unauthenticated guest uploads directly to the datacentre API under the public default admin (`vault-admin-001`) so that even visitors who haven't logged in immediately upload to the datacentre, or prompt the login modal upon clicking "Upload".
+
