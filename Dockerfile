@@ -19,9 +19,10 @@ COPY preview.html /app/preview.html
 
 ENV PYTHONPATH=/app/backend
 ENV STORAGE_LOCAL_ROOT=/data/storage/images
-ENV DATABASE_URL=sqlite:////data/storage/vault.db
+ENV DATABASE_URL=postgresql+psycopg2://vault_app:sm_khot88@172.16.20.106:5432/vault
 ENV ALLOW_PUBLIC_GALLERY=true
 ENV ENVIRONMENT=production
+
 
 # Storage volume mount point
 RUN mkdir -p /data/storage/images
