@@ -401,12 +401,20 @@ The reverse proxy and Cloudflare Tunnel infrastructure on PC3 is **100% locked i
 
 ---
 
-## 13. Session Checkpoint & State (September 25, 2026)
+---
 
-- **Datacentre Hardware State:** All physical cluster nodes and containers were powered down at the end of the session.
-- **Codebase State:** Fully implemented, tested (16/16 Pytest passed), and committed to GitHub.
-- **Ready to resume:** When cluster nodes are powered back on, trigger Jenkins Build or run container with `--network network_tunnel-net`.
+## 14. Feature Implementation: Sign-Up, Login & Multi-Tenant Scoping (Commit `65b9186`)
 
-
-
-
+### Architecture & Implementation:
+1. **Frontend Authentication (`index.html` & `preview.html`):**
+   - **Darkroom Auth Modal (`auth-modal`):** Supports instant switching between "Sign In" and "Create Account".
+   - **Registration:** Sends `POST /api/v1/auth/register` (Full name, Email, 8+ character password) to persist the tenant user directly in PostgreSQL (PC 4).
+   - **Login:** Sends `POST /api/v1/auth/login` to obtain a cryptographic JWT access token (`HS256`) and sets HTTPOnly refresh cookies.
+   - **State Capsule & Header:** When unauthenticated, displays a clean `[Sign In]` button with key icon. When authenticated, displays the archivist monogram, display name, and quick `[Sign Out]` button.
+   - **Dynamic Archival Passport:** Settings tab reflects live authentication state, tenant UUID, registered email, and PostgreSQL verification badge.
+2. **Multi-Tenant Image Scoping:**
+   - Image requests (`GET /api/v1/images`, `POST /api/v1/images/upload`, `DELETE /api/v1/images/{id}`, `GET /api/v1/images/{id}/download`) attach `Authorization: Bearer <token>`.
+   - Photos uploaded by authenticated users are scoped strictly to their `owner_id`, stored in `/data/storage/images/users/{owner_id}/` on PC 3, and registered in PostgreSQL on PC 4.
+   - Preserves public guest viewing when `ALLOW_PUBLIC_GALLERY=true` while guaranteeing multi-tenant isolation when authenticated.
+3. **Verification:**
+   - All 16 automated backend unit tests passing (`backend/tests`).
