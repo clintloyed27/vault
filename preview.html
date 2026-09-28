@@ -117,9 +117,9 @@
         </nav>
       </div>
 
-      <!-- Right Controls: Search, Upload & User -->
+      <!-- Right Controls: Search, Upload & User Auth -->
       <div class="flex items-center gap-3">
-        <div class="relative hidden sm:block w-48 md:w-60">
+        <div class="relative hidden sm:block w-44 md:w-56">
           <svg class="w-3.5 h-3.5 text-[#8C7D6F] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input
             id="search-input"
@@ -138,8 +138,34 @@
           <span>Upload</span>
         </button>
 
-        <div id="header-avatar" class="w-8 h-8 rounded-full bg-[#3D322B] text-[#F4ECE0] flex items-center justify-center font-serif text-xs font-bold border border-[#8C6D46] cursor-pointer" onclick="switchTab('settings')" title="Archivist Profile">
-          AV
+        <!-- Dynamic Auth Button / Profile Capsule -->
+        <div id="auth-header-container" class="flex items-center gap-2">
+          <!-- Unauthenticated state button -->
+          <button
+            id="auth-login-trigger-btn"
+            onclick="openAuthModal('login')"
+            class="flex items-center gap-1.5 bg-[#FAF6EE] hover:bg-[#F0E6D5] text-[#2A221C] text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-lg border border-[#C5B49D] transition shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5 text-[#94662B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>Sign In</span>
+          </button>
+
+          <!-- Authenticated state badge & avatar -->
+          <div id="auth-logged-in-box" class="hidden flex items-center gap-2">
+            <div onclick="switchTab('settings')" class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#FAF6EE] border border-[#D5C8B4] cursor-pointer hover:bg-white transition" title="Archivist Profile">
+              <div id="header-avatar" class="w-6 h-6 rounded-full bg-[#3D322B] text-[#F4ECE0] flex items-center justify-center font-serif text-[10px] font-bold border border-[#8C6D46]">
+                AV
+              </div>
+              <span id="header-user-label" class="text-xs font-mono text-[#2A221C] font-semibold max-w-[100px] truncate hidden md:inline">Alice Vault</span>
+            </div>
+            <button
+              onclick="logoutUser()"
+              title="Sign Out"
+              class="p-1.5 rounded-lg text-[#7A6B5F] hover:text-[#2A221C] hover:bg-[#EFE8DC] transition text-xs font-mono"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -229,27 +255,45 @@
 
     <!-- Tenant Credentials Form -->
     <div class="vintage-card p-8 rounded-2xl">
-      <h3 class="font-serif text-xl font-bold text-[#2A221C] mb-1">Tenant Archival Passport</h3>
-      <p class="text-xs text-[#6F6054] font-serif italic mb-6">Derived strictly from JWT signature tokens — client user_ids are never trusted.</p>
+      <div class="flex items-center justify-between mb-1">
+        <h3 class="font-serif text-xl font-bold text-[#2A221C]">Tenant Archival Passport</h3>
+        <span id="passport-auth-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]">PUBLIC GUEST ACCESS</span>
+      </div>
+      <p class="text-xs text-[#6F6054] font-serif italic mb-6">Derived strictly from JWT signature tokens authenticated with PostgreSQL on PC 4.</p>
       
       <div class="space-y-4 text-xs font-mono max-w-lg">
+        <div id="passport-login-prompt" class="p-4 rounded-xl bg-[#FAF6EE] border border-[#D5C8B4] flex items-center justify-between">
+          <div>
+            <p class="font-semibold text-[#2A221C]">Not Authenticated</p>
+            <p class="text-[11px] text-[#7A6B5F]">Sign in or create an account to access your private vault repository.</p>
+          </div>
+          <button onclick="openAuthModal('login')" class="px-3.5 py-1.5 bg-[#B28242] hover:bg-[#94662B] text-white text-xs font-mono uppercase tracking-wider rounded-lg transition shadow">
+            Sign In / Register
+          </button>
+        </div>
+
         <div>
           <label class="block text-[#6F6054] mb-1">TENANT RECORD IDENTIFIER (UUID)</label>
-          <input type="text" disabled value="edc566e6-a811-4116-b6a3-1f35a6de1dbf" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
+          <input id="passport-id-input" type="text" disabled value="public-unauthenticated-visitor" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
         </div>
         <div>
           <label class="block text-[#6F6054] mb-1">REGISTERED ARCHIVIST EMAIL</label>
-          <input type="text" disabled value="alice@vault.internal" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
+          <input id="passport-email-input" type="text" disabled value="public@vault.swayamruparel.com" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
         </div>
         <div>
           <label class="block text-[#6F6054] mb-1">CALL SIGN / FULL NAME</label>
-          <input id="passport-name-input" type="text" value="Alice Vault" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
+          <input id="passport-name-input" type="text" value="Guest Archivist" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
         </div>
-        <div class="flex items-center gap-3 pt-2">
-          <button onclick="updatePassport()" class="px-5 py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
-            Update Passport
+        <div class="flex items-center justify-between pt-2">
+          <div class="flex items-center gap-3">
+            <button onclick="updatePassport()" class="px-5 py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
+              Update Call Sign
+            </button>
+            <span id="passport-status-msg" class="text-xs font-mono text-[#2E4522] hidden">✓ Saved to Vault</span>
+          </div>
+          <button id="passport-signout-btn" onclick="logoutUser()" class="hidden px-4 py-2 border border-rose-300 text-rose-800 hover:bg-rose-50 rounded-xl transition text-xs font-mono uppercase tracking-wider">
+            Sign Out
           </button>
-          <span id="passport-status-msg" class="text-xs font-mono text-[#2E4522] hidden">✓ Saved to Vault</span>
         </div>
       </div>
     </div>
@@ -387,6 +431,140 @@
         <button onclick="saveNewAlbum()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] text-xs font-mono uppercase tracking-wider rounded-xl transition">
           Create Binder
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AUTHENTICATION MODAL (SIGN IN / REGISTER) ================= -->
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
+    <div class="w-full max-w-md bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
+            <svg class="w-4 h-4 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div>
+            <h3 id="auth-modal-title" class="font-serif text-lg font-bold text-[#2A221C]">Archivist Sign In</h3>
+            <p id="auth-modal-subtitle" class="text-xs text-[#7A6B5F] font-serif italic">Access your private multi-tenant repository on PC 4.</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
+      </div>
+
+      <!-- Auth Tab Toggle (Sign In vs Register) -->
+      <div class="px-6 pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
+        <button id="auth-tab-login" onclick="switchAuthTab('login')" class="px-4 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
+          Sign In
+        </button>
+        <button id="auth-tab-register" onclick="switchAuthTab('register')" class="px-4 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
+          Create Account
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-6 space-y-4">
+        
+        <!-- Error / Status Notice -->
+        <div id="auth-status-alert" class="hidden p-3 rounded-xl border text-xs font-mono"></div>
+
+        <!-- Login Form -->
+        <form id="auth-login-form" onsubmit="handleLoginFormSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Email Address</label>
+            <input
+              id="login-email-input"
+              type="email"
+              required
+              placeholder="archivist@vault.local"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Master Passphrase</label>
+            <input
+              id="login-password-input"
+              type="password"
+              required
+              placeholder="••••••••••••"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+
+          <div class="pt-2">
+            <button
+              id="login-submit-btn"
+              type="submit"
+              class="w-full py-2.5 bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] text-xs font-mono uppercase tracking-wider font-bold rounded-xl transition shadow border border-[#7A5B36] active:scale-[0.98]"
+            >
+              Unlock Private Repository
+            </button>
+          </div>
+        </form>
+
+        <!-- Registration Form -->
+        <form id="auth-register-form" onsubmit="handleRegisterFormSubmit(event)" class="hidden space-y-4">
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Archivist Full Name</label>
+            <input
+              id="register-name-input"
+              type="text"
+              required
+              placeholder="e.g. Swayam Ruparel"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Email Address</label>
+            <input
+              id="register-email-input"
+              type="email"
+              required
+              placeholder="swayam@vault.local"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Master Passphrase (min 8 characters)</label>
+            <input
+              id="register-password-input"
+              type="password"
+              required
+              minlength="8"
+              placeholder="••••••••••••"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Confirm Passphrase</label>
+            <input
+              id="register-confirm-password-input"
+              type="password"
+              required
+              minlength="8"
+              placeholder="••••••••••••"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+            />
+          </div>
+
+          <div class="pt-2">
+            <button
+              id="register-submit-btn"
+              type="submit"
+              class="w-full py-2.5 bg-[#94662B] hover:bg-[#785121] text-white text-xs font-mono uppercase tracking-wider font-bold rounded-xl transition shadow active:scale-[0.98]"
+            >
+              Provision Account (PostgreSQL)
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between text-[11px] font-mono text-[#8C7B6D]">
+        <span>NODE: PC 4 (POSTGRESQL 16)</span>
+        <span>BCRYPT + JWT HS256</span>
       </div>
     </div>
   </div>
@@ -989,10 +1167,30 @@
     }
 
     // Real Master File Download
-    function downloadActiveImage() {
+    async function downloadActiveImage() {
       const target = currentImages[activeIndex];
       if (!target) return;
       if (target.isServer) {
+        try {
+          const token = getAuthToken();
+          const headers = {};
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+          const res = await fetch(`/api/v1/images/${target.id}/download`, { headers });
+          if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = target.title || `plate_${target.id}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return;
+          }
+        } catch (e) {
+          console.warn("Authenticated download stream fallback to direct link:", e);
+        }
         window.open(`/api/v1/images/${target.id}/download`, "_blank");
         return;
       }
@@ -1010,7 +1208,10 @@
       if (confirm(`Incinerate negative plate "${target.title}" permanently?`)) {
         if (target.isServer) {
           try {
-            await fetch(`/api/v1/images/${target.id}`, { method: "DELETE" });
+            const token = getAuthToken();
+            const headers = {};
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+            await fetch(`/api/v1/images/${target.id}`, { method: "DELETE", headers });
             serverPlates = serverPlates.filter(p => p.id !== target.id);
           } catch (err) {
             console.error("Datacentre delete error:", err);
@@ -1189,8 +1390,13 @@
         for (let i = 0; i < files.length; i++) {
           formData.append("files", files[i]);
         }
+        const token = getAuthToken();
+        const uploadHeaders = {};
+        if (token) uploadHeaders["Authorization"] = `Bearer ${token}`;
+
         const res = await fetch("/api/v1/images/upload", {
           method: "POST",
+          headers: uploadHeaders,
           body: formData
         });
         if (res.ok) {
@@ -1199,7 +1405,7 @@
             const newPlate = {
               id: item.id,
               title: item.original_filename,
-              caption: "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
               size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
               dims: `${item.width} × ${item.height}`,
               format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
@@ -1283,18 +1489,289 @@
       document.getElementById("upload-modal").classList.add("hidden");
     }
 
+    // ================= AUTHENTICATION & MULTI-TENANCY =================
+    function getAuthToken() {
+      return localStorage.getItem("vault_jwt_token") || null;
+    }
+
+    function getUserInfo() {
+      try {
+        return JSON.parse(localStorage.getItem("vault_user_info") || "null");
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setAuthSession(token, user) {
+      if (token) localStorage.setItem("vault_jwt_token", token);
+      if (user) {
+        localStorage.setItem("vault_user_info", JSON.stringify(user));
+        localStorage.setItem("vault_user_name", user.full_name || user.email);
+      }
+      updateAuthUI();
+    }
+
+    function clearAuthSession() {
+      localStorage.removeItem("vault_jwt_token");
+      localStorage.removeItem("vault_user_info");
+      localStorage.removeItem("vault_user_name");
+      updateAuthUI();
+    }
+
+    function updateAuthUI() {
+      const token = getAuthToken();
+      const user = getUserInfo();
+      const triggerBtn = document.getElementById("auth-login-trigger-btn");
+      const loggedInBox = document.getElementById("auth-logged-in-box");
+      const headerAvatar = document.getElementById("header-avatar");
+      const headerUserLabel = document.getElementById("header-user-label");
+
+      // Settings elements
+      const passportId = document.getElementById("passport-id-input");
+      const passportEmail = document.getElementById("passport-email-input");
+      const passportName = document.getElementById("passport-name-input");
+      const passportStatus = document.getElementById("passport-auth-status");
+      const passportLoginPrompt = document.getElementById("passport-login-prompt");
+      const passportSignoutBtn = document.getElementById("passport-signout-btn");
+
+      if (token && user) {
+        if (triggerBtn) triggerBtn.classList.add("hidden");
+        if (loggedInBox) loggedInBox.classList.remove("hidden");
+        const displayName = user.full_name || user.email || "Archivist";
+        if (headerUserLabel) headerUserLabel.innerText = displayName;
+        const initials = displayName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "AV";
+        if (headerAvatar) headerAvatar.innerText = initials;
+
+        if (passportId) passportId.value = user.id || "N/A";
+        if (passportEmail) passportEmail.value = user.email || "N/A";
+        if (passportName) passportName.value = displayName;
+        if (passportStatus) {
+          passportStatus.innerText = "AUTHENTICATED (POSTGRESQL PC 4)";
+          passportStatus.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-[#2E4522] text-[#E0EED4] border border-[#4E6F3B]";
+        }
+        if (passportLoginPrompt) passportLoginPrompt.classList.add("hidden");
+        if (passportSignoutBtn) passportSignoutBtn.classList.remove("hidden");
+      } else {
+        if (triggerBtn) triggerBtn.classList.remove("hidden");
+        if (loggedInBox) loggedInBox.classList.add("hidden");
+        if (headerAvatar) headerAvatar.innerText = "AV";
+
+        if (passportId) passportId.value = "public-unauthenticated-visitor";
+        if (passportEmail) passportEmail.value = "public@vault.swayamruparel.com";
+        if (passportName) passportName.value = localStorage.getItem("vault_user_name") || "Guest Archivist";
+        if (passportStatus) {
+          passportStatus.innerText = "PUBLIC GUEST ACCESS";
+          passportStatus.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]";
+        }
+        if (passportLoginPrompt) passportLoginPrompt.classList.remove("hidden");
+        if (passportSignoutBtn) passportSignoutBtn.classList.add("hidden");
+      }
+    }
+
+    function openAuthModal(mode = 'login') {
+      const modal = document.getElementById("auth-modal");
+      modal.classList.remove("hidden");
+      switchAuthTab(mode);
+      hideAuthStatus();
+    }
+
+    function closeAuthModal() {
+      document.getElementById("auth-modal").classList.add("hidden");
+      hideAuthStatus();
+    }
+
+    function switchAuthTab(mode) {
+      const loginForm = document.getElementById("auth-login-form");
+      const registerForm = document.getElementById("auth-register-form");
+      const tabLogin = document.getElementById("auth-tab-login");
+      const tabRegister = document.getElementById("auth-tab-register");
+      const title = document.getElementById("auth-modal-title");
+      const subtitle = document.getElementById("auth-modal-subtitle");
+
+      hideAuthStatus();
+
+      const activeTabClass = "px-4 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition";
+      const inactiveTabClass = "px-4 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition";
+
+      if (mode === 'login') {
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+        tabLogin.className = activeTabClass;
+        tabRegister.className = inactiveTabClass;
+        title.innerText = "Archivist Sign In";
+        subtitle.innerText = "Access your private multi-tenant repository on PC 4.";
+      } else {
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+        tabLogin.className = inactiveTabClass;
+        tabRegister.className = activeTabClass;
+        title.innerText = "Create Private Vault Account";
+        subtitle.innerText = "Provisions a private user record & storage partition on PC 4.";
+      }
+    }
+
+    function showAuthStatus(message, isError = false) {
+      const alert = document.getElementById("auth-status-alert");
+      if (!alert) return;
+      alert.classList.remove("hidden");
+      if (isError) {
+        alert.className = "p-3 rounded-xl border text-xs font-mono bg-rose-50 border-rose-300 text-rose-800";
+      } else {
+        alert.className = "p-3 rounded-xl border text-xs font-mono bg-[#F0F5EB] border-[#B3C8A4] text-[#203118]";
+      }
+      alert.innerText = message;
+    }
+
+    function hideAuthStatus() {
+      const alert = document.getElementById("auth-status-alert");
+      if (alert) alert.classList.add("hidden");
+    }
+
+    async function handleLoginFormSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("login-email-input").value.trim();
+      const password = document.getElementById("login-password-input").value;
+      const submitBtn = document.getElementById("login-submit-btn");
+
+      if (!email || !password) {
+        showAuthStatus("Email and passphrase are required.", true);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Authenticating with PC 4...";
+
+      try {
+        const res = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Authentication failed. Check email & passphrase.");
+        }
+
+        setAuthSession(data.access_token, data.user);
+        showAuthStatus("Credentials accepted! Unlocking repository...", false);
+
+        setTimeout(() => {
+          closeAuthModal();
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Unlock Private Repository";
+          initVault();
+        }, 800);
+
+      } catch (err) {
+        showAuthStatus(err.message || "Failed to reach authentication service.", true);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Unlock Private Repository";
+      }
+    }
+
+    async function handleRegisterFormSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("register-name-input").value.trim();
+      const email = document.getElementById("register-email-input").value.trim();
+      const password = document.getElementById("register-password-input").value;
+      const confirmPassword = document.getElementById("register-confirm-password-input").value;
+      const submitBtn = document.getElementById("register-submit-btn");
+
+      if (!name || !email || !password) {
+        showAuthStatus("All fields are required.", true);
+        return;
+      }
+
+      if (password.length < 8) {
+        showAuthStatus("Passphrase must be at least 8 characters.", true);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showAuthStatus("Passphrases do not match.", true);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Provisioning on PostgreSQL...";
+
+      try {
+        const res = await fetch("/api/v1/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: name,
+            email: email,
+            password: password
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Registration failed. User may already exist.");
+        }
+
+        showAuthStatus("Account provisioned! Logging into private vault...", false);
+
+        // Auto login with new credentials
+        const loginRes = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginRes.ok) {
+          setAuthSession(loginData.access_token, loginData.user);
+        }
+
+        setTimeout(() => {
+          closeAuthModal();
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Provision Account (PostgreSQL)";
+          initVault();
+        }, 1000);
+
+      } catch (err) {
+        showAuthStatus(err.message || "Registration error occurred.", true);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Provision Account (PostgreSQL)";
+      }
+    }
+
+    async function logoutUser() {
+      try {
+        const token = getAuthToken();
+        if (token) {
+          fetch("/api/v1/auth/logout", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` }
+          }).catch(() => {});
+        }
+      } finally {
+        clearAuthSession();
+        initVault();
+      }
+    }
+
     // ================= SETTINGS & TELEMETRY =================
     function updatePassport() {
       const name = document.getElementById("passport-name-input").value.trim() || "Alice Vault";
       localStorage.setItem("vault_user_name", name);
       
-      // Update header avatar monogram
-      const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-      document.getElementById("header-avatar").innerText = initials;
+      const user = getUserInfo();
+      if (user) {
+        user.full_name = name;
+        localStorage.setItem("vault_user_info", JSON.stringify(user));
+      }
+      
+      updateAuthUI();
       
       const msg = document.getElementById("passport-status-msg");
-      msg.classList.remove("hidden");
-      setTimeout(() => msg.classList.add("hidden"), 3000);
+      if (msg) {
+        msg.classList.remove("hidden");
+        setTimeout(() => msg.classList.add("hidden"), 3000);
+      }
     }
 
     function updateTelemetryCounters() {
@@ -1314,6 +1791,7 @@
         closeViewer();
         closeUploadModal();
         closeNewAlbumModal();
+        closeAuthModal();
       }
       if (e.key === "ArrowLeft") navigateViewer(-1);
       if (e.key === "ArrowRight") navigateViewer(1);
@@ -1321,23 +1799,24 @@
 
     // Initial load: Datacentre Server + LocalStorage
     async function initVault() {
-      // 1. Load saved user name
-      const savedName = localStorage.getItem("vault_user_name") || "Alice Vault";
-      const passportInput = document.getElementById("passport-name-input");
-      if (passportInput) passportInput.value = savedName;
-      const initials = savedName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-      document.getElementById("header-avatar").innerText = initials;
+      // 1. Sync Authentication UI state
+      updateAuthUI();
 
-      // 2. Fetch Datacentre Plates from server API
+      // 2. Fetch Datacentre Plates from server API with auth token
+      serverPlates = [];
       try {
-        const res = await fetch("/api/v1/images");
+        const token = getAuthToken();
+        const headers = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const res = await fetch("/api/v1/images", { headers });
         if (res.ok) {
           const data = await res.json();
           if (data && data.items) {
             serverPlates = data.items.map(item => ({
               id: item.id,
               title: item.original_filename,
-              caption: "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
               size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
               dims: `${item.width} × ${item.height}`,
               format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
