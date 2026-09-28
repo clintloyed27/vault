@@ -30,9 +30,12 @@ test_vault.db
 
 # Storage data (Persistent blobs)
 storage_data/
-storage/
+/storage/
 /data/images/
+!backend/app/storage/
+!backend/app/storage/**
 *.tmp_*
+
 
 # Node & Next.js
 node_modules/
