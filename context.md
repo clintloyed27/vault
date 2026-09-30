@@ -575,5 +575,29 @@ The entire automated pipeline executed with **SUCCESS**:
    - Nginx Proxy Manager access logs confirm immediate forwarding to `server2026-web` with `HTTP 200 OK`.
    - Domain response time stabilized at ~0.8s - 1.0s.
 
+---
+
+## 23. Known Issues & Priority Agenda for Tomorrow (October 1, 2026)
+
+### Issue Reported:
+- **Image Datacentre Persistence & Session Disappearance:**
+  - When users upload/save photos in the vault, the images are not being persisted to the physical datacentre disk/PostgreSQL database properly.
+  - After logging out and logging back into the account, the previously uploaded images disappear / are gone.
+
+### Investigation & Action Items for Tomorrow:
+1. **Frontend Ingestion Pipeline Audit:**
+   - Inspect `processSelectedFiles` and `uploadFileToServer` in [`index.html`](file:///d:/Coding/server/index.html) and [`preview.html`](file:///d:/Coding/server/preview.html).
+   - Ensure files are uploaded directly via `multipart/form-data` to `POST /api/v1/images/upload` with the active `Authorization: Bearer <jwt>` token rather than falling back to browser IndexedDB (`dbSavePlate`).
+2. **Backend Tenancy & User ID Scope:**
+   - Verify `current_user.id` mapping in `backend/app/api/v1/images.py` during `upload_images`.
+   - Ensure the image records stored in PostgreSQL (`images` table on PC4) are correctly bound to `owner_id = current_user.id`.
+   - Verify `GET /api/v1/images` query logic to confirm it correctly selects and returns all photos belonging to the authenticated user.
+3. **Physical Storage Volume Persistence on PC3:**
+   - Inspect Docker Compose volume mapping for `server2026-web` on PC3.
+   - Verify that the image storage directory inside the container (e.g. `/app/data/storage` or configured local path) is backed by a persistent host directory on PC3 (so container restarts don't drop files).
+4. **Post-Login State Synchronization:**
+   - Verify that upon completing login / token refresh, `initVault()` is immediately triggered with the fresh JWT token to load the user's datacentre gallery.
+
+
 
 
