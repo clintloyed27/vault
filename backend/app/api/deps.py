@@ -1,6 +1,6 @@
 from typing import Generator, Optional
 import jwt
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -17,12 +17,15 @@ security = HTTPBearer(auto_error=False)
 def get_current_user(
     db: Session = Depends(get_db),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    token_param: Optional[str] = Query(None, alias="token"),
+    token_cookie: Optional[str] = Cookie(None, alias="vault_access_token"),
 ) -> User:
     """
-    Derives authenticated user identity STRICTLY from validated JWT signature.
-    Client-supplied user_id headers or bodies are NEVER trusted for authorization.
+    Derives authenticated user identity strictly from validated JWT signature.
+    Supports Authorization header, 'token' query parameter (for img elements), and access cookie.
     """
-    if not credentials or not credentials.credentials:
+    token = (credentials.credentials if credentials and credentials.credentials else None) or token_param or token_cookie
+    if not token:
         if settings.ALLOW_PUBLIC_GALLERY:
             default_user = UserRepository.get_by_email(db, email="admin@vault.local")
             if not default_user:
@@ -40,7 +43,6 @@ def get_current_user(
             return default_user
         raise AuthenticationError("Not authenticated")
 
-    token = credentials.credentials
     try:
         payload = decode_token(token)
         user_id: str = payload.get("sub")

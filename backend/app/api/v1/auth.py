@@ -45,6 +45,16 @@ def login(
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/api/v1/auth",
     )
+    # Set access token cookie for browser <img> previews
+    response.set_cookie(
+        key="vault_access_token",
+        value=access_token,
+        httponly=False,
+        secure=settings.ENVIRONMENT == "production",
+        samesite="lax",
+        max_age=expires_in,
+        path="/",
+    )
 
     return TokenResponse(
         access_token=access_token,
@@ -74,6 +84,7 @@ def refresh(
         db=db, raw_refresh_token=raw_token
     )
 
+    # Set rotated refresh cookie
     response.set_cookie(
         key="vault_refresh_token",
         value=new_refresh,
@@ -82,6 +93,16 @@ def refresh(
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/api/v1/auth",
+    )
+    # Set refreshed access token cookie for browser <img> previews
+    response.set_cookie(
+        key="vault_access_token",
+        value=new_access,
+        httponly=False,
+        secure=settings.ENVIRONMENT == "production",
+        samesite="lax",
+        max_age=expires_in,
+        path="/",
     )
 
     return TokenResponse(
@@ -107,6 +128,7 @@ def logout(
         auth_service.revoke_refresh_token(db=db, raw_refresh_token=vault_refresh_token)
 
     response.delete_cookie(key="vault_refresh_token", path="/api/v1/auth")
+    response.delete_cookie(key="vault_access_token", path="/")
     return {"message": "Logged out successfully"}
 
 

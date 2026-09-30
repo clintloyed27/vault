@@ -950,10 +950,10 @@
 
         frame.innerHTML = `
           <div class="overflow-hidden rounded aspect-[4/3] bg-[#EFE7D8] relative">
-            <img src="${img.url}" alt="${img.title}" loading="lazy" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
+            <img src="${img.thumbUrl || img.url}" alt="${img.title}" loading="lazy" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
             ${customBadge}
             <div class="absolute top-2.5 right-2.5 bg-[#2A221C]/80 text-[#F4ECE0] font-mono text-[9px] px-2 py-0.5 rounded border border-[#755D49] tracking-wider uppercase">
-              ${img.format.split(" ")[0]}
+              ${(img.format || "JPEG").split(" ")[0]}
             </div>
           </div>
           <div class="mt-3 px-1 flex flex-col">
@@ -1243,7 +1243,7 @@
     async function deleteActiveImage() {
       const target = currentImages[activeIndex];
       if (!target) return;
-      if (confirm(`Incinerate negative plate "${target.title}" permanently?`)) {
+      if (confirm(`Are you sure you want to permanently delete "${target.title}"?`)) {
         if (target.isServer) {
           try {
             await authFetch(`/api/v1/images/${target.id}`, { method: "DELETE" });
@@ -1344,6 +1344,7 @@
           const data = await res.json();
           const token = getAuthToken();
           data.forEach(item => {
+            const urls = buildPlateUrls(item);
             const newPlate = {
               id: item.id,
               title: item.original_filename,
@@ -1352,8 +1353,8 @@
               dims: `${item.width} × ${item.height}`,
               format: "JPEG (LIVE CAPTURE)",
               hash: item.checksum_sha256,
-              url: `/api/v1/images/${item.id}/file`,
-              thumbUrl: `/api/v1/images/${item.id}/thumbnail`,
+              url: urls.url,
+              thumbUrl: urls.thumbUrl,
               isServer: true,
               timestamp: new Date(item.created_at).getTime(),
               albumId: ""
@@ -1445,6 +1446,7 @@
           const data = await res.json();
           const token = getAuthToken();
           data.forEach(item => {
+            const urls = buildPlateUrls(item);
             const newPlate = {
               id: item.id,
               title: item.original_filename,
@@ -1453,8 +1455,8 @@
               dims: `${item.width} × ${item.height}`,
               format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
               hash: item.checksum_sha256,
-              url: `/api/v1/images/${item.id}/file`,
-              thumbUrl: `/api/v1/images/${item.id}/thumbnail`,
+              url: urls.url,
+              thumbUrl: urls.thumbUrl,
               isServer: true,
               timestamp: new Date(item.created_at).getTime(),
               albumId: item.album_id || ""
@@ -1545,6 +1547,15 @@
       return localStorage.getItem("vault_jwt_token") || null;
     }
 
+    function buildPlateUrls(item) {
+      const token = getAuthToken();
+      const tokenQuery = token ? `?token=${encodeURIComponent(token)}` : "";
+      return {
+        url: `/api/v1/images/${item.id}/file${tokenQuery}`,
+        thumbUrl: `/api/v1/images/${item.id}/thumbnail${tokenQuery}`
+      };
+    }
+
     function getUserInfo() {
       try {
         return JSON.parse(localStorage.getItem("vault_user_info") || "null");
@@ -1554,7 +1565,10 @@
     }
 
     function setAuthSession(token, user) {
-      if (token) localStorage.setItem("vault_jwt_token", token);
+      if (token) {
+        localStorage.setItem("vault_jwt_token", token);
+        document.cookie = `vault_access_token=${encodeURIComponent(token)}; path=/; max-age=86400; SameSite=Lax`;
+      }
       if (user) {
         localStorage.setItem("vault_user_info", JSON.stringify(user));
         localStorage.setItem("vault_user_name", user.full_name || user.email);
@@ -1566,6 +1580,7 @@
       localStorage.removeItem("vault_jwt_token");
       localStorage.removeItem("vault_user_info");
       localStorage.removeItem("vault_user_name");
+      document.cookie = "vault_access_token=; path=/; max-age=0; SameSite=Lax";
       updateAuthUI();
     }
 
@@ -1631,6 +1646,7 @@
             const data = await res.json();
             const token = getAuthToken();
             data.forEach(item => {
+              const urls = buildPlateUrls(item);
               const newPlate = {
                 id: item.id,
                 title: item.original_filename,
@@ -1639,8 +1655,8 @@
                 dims: `${item.width} × ${item.height}`,
                 format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
                 hash: item.checksum_sha256,
-                url: `/api/v1/images/${item.id}/file`,
-                thumbUrl: `/api/v1/images/${item.id}/thumbnail`,
+                url: urls.url,
+                thumbUrl: urls.thumbUrl,
                 isServer: true,
                 timestamp: new Date(item.created_at).getTime(),
                 albumId: item.album_id || ""
@@ -1962,20 +1978,23 @@
           const data = await res.json();
           if (data && data.items) {
             const token = getAuthToken();
-            serverPlates = data.items.map(item => ({
-              id: item.id,
-              title: item.original_filename,
-              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
-              size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
-              dims: `${item.width} × ${item.height}`,
-              format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
-              hash: item.checksum_sha256,
-              url: `/api/v1/images/${item.id}/file`,
-              thumbUrl: `/api/v1/images/${item.id}/thumbnail`,
-              isServer: true,
-              timestamp: new Date(item.created_at).getTime(),
-              albumId: item.album_id || ""
-            }));
+            serverPlates = data.items.map(item => {
+              const urls = buildPlateUrls(item);
+              return {
+                id: item.id,
+                title: item.original_filename,
+                caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+                size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
+                dims: `${item.width} × ${item.height}`,
+                format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
+                hash: item.checksum_sha256,
+                url: urls.url,
+                thumbUrl: urls.thumbUrl,
+                isServer: true,
+                timestamp: new Date(item.created_at).getTime(),
+                albumId: item.album_id || ""
+              };
+            });
           }
         }
       } catch (err) {
