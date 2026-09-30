@@ -108,9 +108,6 @@
           <button id="tab-gallery-btn" onclick="switchTab('gallery')" class="px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm">
             Photos
           </button>
-          <button id="tab-albums-btn" onclick="switchTab('albums')" class="px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
-            Albums
-          </button>
           <button id="tab-settings-btn" onclick="switchTab('settings')" class="px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
             Settings
           </button>
@@ -185,11 +182,6 @@
         </span>
       </div>
 
-      <!-- Active Album Filter Pill (if filtering by album) -->
-      <div id="album-filter-indicator" class="hidden items-center gap-2 bg-[#EFE7D8] border border-[#D5C8B4] px-3 py-1 rounded-full text-xs font-mono text-[#2A221C]">
-        <span id="album-filter-text">Binder: ...</span>
-        <button onclick="clearAlbumFilter()" class="hover:text-rose-600 font-bold ml-1" title="Show All Photos">✕</button>
-      </div>
     </div>
 
     <!-- Local Offline Plates Banner / Sync Trigger -->
@@ -216,68 +208,40 @@
     </div>
   </main>
 
-  <!-- ================= TAB: PORTFOLIOS (ALBUMS) ================= -->
-  <main id="tab-albums" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-[#E6DDD0]">
-      <div class="flex items-baseline gap-3">
-        <h1 class="text-xl font-serif font-bold tracking-tight text-[#241D18]">
-          Albums
-        </h1>
-        <span id="albums-counter" class="text-xs font-mono text-[#8C7D6F]">2 albums</span>
-      </div>
 
-      <button onclick="openNewAlbumModal()" class="flex items-center gap-1.5 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-[#7A5B36] transition shadow-sm">
-        <svg class="w-3.5 h-3.5 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>New Album</span>
-      </button>
-    </div>
 
-    <!-- Dynamic Albums Grid -->
-    <div id="albums-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-      <!-- Dynamically rendered -->
-    </div>
-  </main>
-
-  <!-- ================= TAB: REGISTRY & CIPHER (SETTINGS) ================= -->
+  <!-- ================= TAB: SETTINGS ================= -->
   <main id="tab-settings" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 space-y-8">
     <div class="border-b border-[#E1D7C6] pb-6">
-      <span class="text-[10px] font-mono uppercase tracking-widest text-[#9C754A] font-bold">
-        SECURITY REGISTRY
-      </span>
-      <h1 class="text-3xl font-serif font-bold tracking-tight text-[#241D18]">
-        Archival Registry & Cryptography Parameters
+      <h1 class="text-2xl font-serif font-bold tracking-tight text-[#241D18]">
+        Settings
       </h1>
       <p class="text-xs text-[#6F6054] font-serif italic mt-1">
-        Argon2id Memory-Hard Cipher & Server-Side Tenancy Isolation
+        Storage usage and account configuration
       </p>
     </div>
 
     <!-- Telemetry Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div class="paper-texture p-5 rounded-2xl">
-        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Volume Consumption</span>
-        <p id="settings-storage-used" class="text-3xl font-serif font-bold text-[#241D18]">24.8 MB</p>
-        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Persistent Volume on PC 3</p>
+        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Storage Used</span>
+        <p id="settings-storage-used" class="text-3xl font-serif font-bold text-[#241D18]">0.0 MB</p>
+        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Physical Datacentre Disk</p>
       </div>
       <div class="paper-texture p-5 rounded-2xl">
-        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Cataloged Plates</span>
-        <p id="settings-plates-count" class="text-3xl font-serif font-bold text-[#241D18]">6 Plates</p>
-        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Zero BOLA Cross-Tenant Leaks</p>
-      </div>
-      <div class="paper-texture p-5 rounded-2xl">
-        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Cipher Standard</span>
-        <p class="text-3xl font-serif font-bold text-[#94662B]">Argon2id</p>
-        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">RFC 9106 (64MB RAM hardness)</p>
+        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Total Photos</span>
+        <p id="settings-plates-count" class="text-3xl font-serif font-bold text-[#241D18]">0 Photos</p>
+        <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Stored in private vault</p>
       </div>
     </div>
 
-    <!-- Tenant Credentials Form -->
+    <!-- Database Details Form -->
     <div class="vintage-card p-8 rounded-2xl">
       <div class="flex items-center justify-between mb-1">
-        <h3 class="font-serif text-xl font-bold text-[#2A221C]">Tenant Archival Passport</h3>
-        <span id="passport-auth-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]">PUBLIC GUEST ACCESS</span>
+        <h3 class="font-serif text-xl font-bold text-[#2A221C]">Database Details</h3>
+        <span id="passport-auth-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]">NOT SIGNED IN</span>
       </div>
-      <p class="text-xs text-[#6F6054] font-serif italic mb-6">Derived strictly from JWT signature tokens authenticated with PostgreSQL on PC 4.</p>
+      <p class="text-xs text-[#6F6054] font-serif italic mb-6">User profile and PostgreSQL connection details.</p>
       
       <div class="space-y-4 text-xs font-mono max-w-lg">
         <div id="passport-login-prompt" class="p-4 rounded-xl bg-[#FAF6EE] border border-[#D5C8B4] flex items-center justify-between">
@@ -291,23 +255,23 @@
         </div>
 
         <div>
-          <label class="block text-[#6F6054] mb-1">TENANT RECORD IDENTIFIER (UUID)</label>
-          <input id="passport-id-input" type="text" disabled value="public-unauthenticated-visitor" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
+          <label class="block text-[#6F6054] mb-1">USER ID</label>
+          <input id="passport-id-input" type="text" disabled value="not-authenticated" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
         </div>
         <div>
-          <label class="block text-[#6F6054] mb-1">REGISTERED ARCHIVIST EMAIL</label>
-          <input id="passport-email-input" type="text" disabled value="public@vault.swayamruparel.com" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
+          <label class="block text-[#6F6054] mb-1">EMAIL</label>
+          <input id="passport-email-input" type="text" disabled value="none" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
         </div>
         <div>
-          <label class="block text-[#6F6054] mb-1">CALL SIGN / FULL NAME</label>
-          <input id="passport-name-input" type="text" value="Guest Archivist" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
+          <label class="block text-[#6F6054] mb-1">NAME</label>
+          <input id="passport-name-input" type="text" placeholder="Your Name" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
         </div>
         <div class="flex items-center justify-between pt-2">
           <div class="flex items-center gap-3">
             <button onclick="updatePassport()" class="px-5 py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
-              Update Call Sign
+              Save Name
             </button>
-            <span id="passport-status-msg" class="text-xs font-mono text-[#2E4522] hidden">✓ Saved to Vault</span>
+            <span id="passport-status-msg" class="text-xs font-mono text-[#2E4522] hidden">✓ Saved</span>
           </div>
           <button id="passport-signout-btn" onclick="logoutUser()" class="hidden px-4 py-2 border border-rose-300 text-rose-800 hover:bg-rose-50 rounded-xl transition text-xs font-mono uppercase tracking-wider">
             Sign Out
@@ -352,7 +316,6 @@
     <div class="relative w-full h-full flex items-center justify-center p-6 sm:p-12 overflow-hidden">
       <div class="bg-white p-3 sm:p-4 rounded-xl shadow-2xl border border-[#3A2E26] max-h-[85vh] max-w-[90vw] flex flex-col items-center">
         <img id="viewer-img" src="" alt="" class="max-h-[75vh] object-contain rounded transition-transform duration-300 cursor-zoom-in" onclick="toggleZoom()">
-        <span id="viewer-caption" class="text-[11px] font-mono text-[#5C4D41] mt-2 tracking-wider uppercase text-center max-w-xl truncate"></span>
       </div>
 
       <button onclick="navigateViewer(-1)" class="absolute left-6 top-1/2 -translate-y-1/2 p-3 text-[#EFE7D8] bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl">
@@ -379,12 +342,7 @@
           <p id="meta-filename" class="font-semibold text-[#F4ECE0] break-all"></p>
         </div>
 
-        <div>
-          <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-1">Portfolio Binder Assignment</span>
-          <select id="meta-album-select" onchange="assignActivePlateToAlbum(this.value)" class="w-full bg-[#2A221C] border border-[#4A3D34] rounded-lg px-2.5 py-1.5 text-xs text-[#D5C3A5] focus:outline-none focus:border-[#C79A59]">
-            <option value="">— Unassigned Negative —</option>
-          </select>
-        </div>
+
 
         <div class="grid grid-cols-2 gap-3 pt-2">
           <div class="p-3 rounded-xl bg-[#2A221C] border border-[#4A3D34]">
@@ -419,39 +377,7 @@
     </div>
   </div>
 
-  <!-- ================= NEW ALBUM MODAL ================= -->
-  <div id="new-album-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
-    <div class="w-full max-w-md bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-[#E7DECE]">
-        <h3 class="font-serif text-lg font-bold text-[#2A221C]">New Portfolio Binder</h3>
-        <button onclick="closeNewAlbumModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
-      </div>
 
-      <div class="space-y-3 text-xs font-mono">
-        <div>
-          <label class="block text-[#6F6054] mb-1">BINDER TITLE</label>
-          <input id="new-album-title" type="text" placeholder="e.g. 1984 European Architecture" class="w-full bg-[#FAF6EE] border border-[#DDD3C2] rounded-lg px-3 py-2 text-[#2A221C] focus:outline-none focus:border-[#B28242]">
-        </div>
-        <div>
-          <label class="block text-[#6F6054] mb-1">BOX / ACCESSION NUMBER</label>
-          <input id="new-album-box" type="text" placeholder="e.g. BOX NO. 42" class="w-full bg-[#FAF6EE] border border-[#DDD3C2] rounded-lg px-3 py-2 text-[#2A221C] focus:outline-none focus:border-[#B28242]">
-        </div>
-        <div>
-          <label class="block text-[#6F6054] mb-1">DESCRIPTION</label>
-          <textarea id="new-album-desc" rows="3" placeholder="Brief summary of plates archived in this collection..." class="w-full bg-[#FAF6EE] border border-[#DDD3C2] rounded-lg px-3 py-2 text-[#2A221C] focus:outline-none focus:border-[#B28242]"></textarea>
-        </div>
-      </div>
-
-      <div class="pt-3 border-t border-[#E7DECE] flex items-center justify-end gap-2">
-        <button onclick="closeNewAlbumModal()" class="px-4 py-2 text-xs font-mono text-[#695B50] hover:text-[#2A221C] transition">
-          Cancel
-        </button>
-        <button onclick="saveNewAlbum()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] text-xs font-mono uppercase tracking-wider rounded-xl transition">
-          Create Binder
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- ================= AUTHENTICATION MODAL (SIGN IN / REGISTER) ================= -->
   <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
@@ -683,106 +609,15 @@
 
   <!-- ================= DATA & JAVASCRIPT ================= -->
   <script>
-    const vintageImages = [
-      {
-        id: "plate-01",
-        title: "leica_m3_rangefinder_1954.jpg",
-        caption: "Leica M3 Rangefinder Camera with Summicron 50mm Lens // 35mm Film Exposure",
-        size: "4.8 MB",
-        dims: "3840 × 2160",
-        format: "JPEG (FINE GRAIN)",
-        hash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-        url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
-        albumId: "album-2"
-      },
-      {
-        id: "plate-02",
-        title: "analog_darkroom_enlarger.jpg",
-        caption: "Silver Gelatin Darkroom Enlarger under Amber Safelight // Archival Print",
-        size: "3.4 MB",
-        dims: "2800 × 1800",
-        format: "JPEG (SEPIA TONE)",
-        hash: "9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca7",
-        url: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=1200&q=80",
-        albumId: "album-2"
-      },
-      {
-        id: "plate-03",
-        title: "monochrome_street_archive_rome.png",
-        caption: "Via Condotti Piazza di Spagna // Monochromatic Negative Plate #401",
-        size: "5.7 MB",
-        dims: "4096 × 2730",
-        format: "PNG (16-BIT GRAYSCALE)",
-        hash: "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
-        url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80",
-        albumId: ""
-      },
-      {
-        id: "plate-04",
-        title: "datacenter_switch_rack_vintage.jpg",
-        caption: "PC 3 Server Switch Matrix // Fiber Patch Bay Installation 1984",
-        size: "2.9 MB",
-        dims: "2400 × 1600",
-        format: "JPEG",
-        hash: "112122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-        url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
-        albumId: "album-1"
-      },
-      {
-        id: "plate-05",
-        title: "olympus_om1_mechanical_optics.jpg",
-        caption: "Olympus OM-1 Mechanical Shutter Assembly // Technical Macro Exposure",
-        size: "4.1 MB",
-        dims: "3000 × 2000",
-        format: "JPEG (EKTAPRO 100)",
-        hash: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
-        url: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80",
-        albumId: "album-2"
-      },
-      {
-        id: "plate-06",
-        title: "archival_leather_ledger_vault.jpg",
-        caption: "Bound Parchment Ledger of Cryptographic Public Keys // National Archive",
-        size: "3.8 MB",
-        dims: "2500 × 1667",
-        format: "JPEG (MATTE COATED)",
-        hash: "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
-        url: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80",
-        albumId: ""
-      }
-    ];
-
     let serverPlates = [];
-    let userPlates = [];
     let currentImages = [];
-    let userAlbums = [];
-    let activeAlbumFilter = null;
     let activeIndex = 0;
     let isZoomed = false;
     let infoOpen = false;
 
-    // Default Seed Albums
-    const defaultAlbums = [
-      {
-        id: "album-1",
-        box: "BOX NO. 14",
-        title: "Data Centre Engineering (PC 1–4)",
-        description: "Circuit diagrams, terminal logs, and rack hardware setup for the Proxmox private data centre cluster.",
-        borderClass: "border-t-[#B28242]"
-      },
-      {
-        id: "album-2",
-        box: "BOX NO. 29",
-        title: "Classic Architecture & Optics",
-        description: "Mechanical cameras, glass lenses, and physical switch installations recorded in high dynamic range.",
-        borderClass: "border-t-[#4A3D34]"
-      }
-    ];
-
     // ================= INDEXEDDB PERSISTENCE ENGINE =================
     const DB_NAME = "VaultArchiveDB";
     const PLATES_STORE = "uploaded_plates";
-    const ALBUMS_STORE = "vault_albums";
     const DB_VERSION = 2;
 
     function openDB() {
@@ -796,9 +631,6 @@
           const db = e.target.result;
           if (!db.objectStoreNames.contains(PLATES_STORE)) {
             db.createObjectStore(PLATES_STORE, { keyPath: "id" });
-          }
-          if (!db.objectStoreNames.contains(ALBUMS_STORE)) {
-            db.createObjectStore(ALBUMS_STORE, { keyPath: "id" });
           }
         };
         request.onsuccess = () => resolve(request.result);
@@ -867,41 +699,7 @@
       }
     }
 
-    async function dbSaveAlbum(album) {
-      try {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(ALBUMS_STORE, "readwrite");
-          const store = tx.objectStore(ALBUMS_STORE);
-          store.put(album);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => reject(tx.error);
-        });
-      } catch (e) {
-        const list = JSON.parse(localStorage.getItem("vault_albums_data") || "[]");
-        list.push(album);
-        localStorage.setItem("vault_albums_data", JSON.stringify(list));
-      }
-    }
 
-    async function dbGetAllAlbums() {
-      try {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(ALBUMS_STORE, "readonly");
-          const store = tx.objectStore(ALBUMS_STORE);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => reject(req.error);
-        });
-      } catch (e) {
-        try {
-          return JSON.parse(localStorage.getItem("vault_albums_data") || "[]");
-        } catch {
-          return [];
-        }
-      }
-    }
 
     function readFileAsDataUrl(file) {
       return new Promise((resolve, reject) => {
@@ -973,7 +771,6 @@
           </div>
           <div class="mt-3 px-1 flex flex-col">
             <h4 class="font-serif font-bold text-sm text-[#2A221C] group-hover:text-[#94662B] transition truncate">${img.title}</h4>
-            <p class="font-serif italic text-xs text-[#7A6A5E] mt-0.5 line-clamp-1">${img.caption}</p>
             <div class="mt-2.5 pt-2 border-t border-[#EFE7D8] flex items-center justify-between text-[10px] font-mono text-[#8C7B6D]">
               <span>${img.dims}</span>
               <span>${img.size}</span>
@@ -998,45 +795,15 @@
       }
     }
 
-    function applyActiveFilter() {
-      const isAuth = !!getAuthToken();
-      let pool = isAuth ? [...serverPlates] : (serverPlates.length > 0 ? [...serverPlates] : [...vintageImages]);
-      if (activeAlbumFilter) {
-        pool = pool.filter(i => i.albumId === activeAlbumFilter);
-        const album = [...defaultAlbums, ...userAlbums].find(a => a.id === activeAlbumFilter);
-        const ind = document.getElementById("album-filter-indicator");
-        ind.classList.remove("hidden");
-        ind.classList.add("flex");
-        document.getElementById("album-filter-text").innerText = `Binder: ${album ? album.title : activeAlbumFilter}`;
-      } else {
-        const ind = document.getElementById("album-filter-indicator");
-        ind.classList.add("hidden");
-        ind.classList.remove("flex");
-      }
-      currentImages = pool;
-      renderGallery(currentImages);
-    }
-
-    function clearAlbumFilter() {
-      activeAlbumFilter = null;
-      applyActiveFilter();
-    }
-
     function handleSearch(val) {
       const q = val.toLowerCase().trim();
-      const isAuth = !!getAuthToken();
-      let pool = isAuth ? [...serverPlates] : (serverPlates.length > 0 ? [...serverPlates] : [...vintageImages]);
-      if (activeAlbumFilter) {
-        pool = pool.filter(i => i.albumId === activeAlbumFilter);
-      }
       if (!q) {
-        currentImages = [...pool];
+        currentImages = [...serverPlates];
         renderGallery(currentImages);
         return;
       }
-      currentImages = pool.filter(i => 
+      currentImages = serverPlates.filter(i => 
         i.title.toLowerCase().includes(q) || 
-        i.caption.toLowerCase().includes(q) ||
         (i.format && i.format.toLowerCase().includes(q))
       );
       renderGallery(currentImages);
@@ -1044,127 +811,22 @@
 
     function switchTab(tab) {
       document.getElementById("tab-gallery").classList.add("hidden");
-      document.getElementById("tab-albums").classList.add("hidden");
       document.getElementById("tab-settings").classList.add("hidden");
 
       const inactive = "px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]";
       const active = "px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm";
 
       document.getElementById("tab-gallery-btn").className = inactive;
-      document.getElementById("tab-albums-btn").className = inactive;
       document.getElementById("tab-settings-btn").className = inactive;
 
       if (tab === 'gallery') {
         document.getElementById("tab-gallery").classList.remove("hidden");
         document.getElementById("tab-gallery-btn").className = active;
-      } else if (tab === 'albums') {
-        document.getElementById("tab-albums").classList.remove("hidden");
-        document.getElementById("tab-albums-btn").className = active;
-        renderAlbums();
       } else if (tab === 'settings') {
         document.getElementById("tab-settings").classList.remove("hidden");
         document.getElementById("tab-settings-btn").className = active;
         updateTelemetryCounters();
       }
-    }
-
-    // ================= ALBUMS SYSTEM =================
-    function renderAlbums() {
-      const container = document.getElementById("albums-grid");
-      container.innerHTML = "";
-      const allAlbums = [...defaultAlbums, ...userAlbums];
-      document.getElementById("albums-counter").innerText = `${allAlbums.length} albums`;
-
-      allAlbums.forEach(album => {
-        const isAuth = !!getAuthToken();
-        const allPlates = isAuth ? [...serverPlates] : (serverPlates.length > 0 ? [...serverPlates] : [...vintageImages]);
-        const count = allPlates.filter(p => p.albumId === album.id).length;
-
-        const card = document.createElement("div");
-        card.className = `vintage-card rounded-2xl p-6 cursor-pointer border-t-4 ${album.borderClass || 'border-t-[#B28242]'}`;
-        card.onclick = () => {
-          activeAlbumFilter = album.id;
-          switchTab('gallery');
-          applyActiveFilter();
-        };
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between">
-            <div class="w-12 h-12 rounded-xl bg-[#F0E7D8] border border-[#D5C8B4] flex items-center justify-center text-[#73522C]">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
-            </div>
-            <span class="text-[10px] font-mono bg-[#EFE5D4] text-[#69584B] px-2 py-1 rounded border border-[#DCD1BF]">${album.box || 'ARCHIVE'}</span>
-          </div>
-          <h3 class="font-serif text-xl font-bold text-[#2A221C] mt-5">${album.title}</h3>
-          <p class="text-xs text-[#6F6054] mt-1.5 font-serif leading-relaxed line-clamp-2">
-            ${album.description || 'Collection of verified negative plates.'}
-          </p>
-          <div class="mt-6 pt-4 border-t border-[#EFE7D8] flex items-center justify-between text-xs font-mono text-[#7D6E62]">
-            <span>${count} Plates Included</span>
-            <span class="text-[#94662B] font-semibold hover:underline">Inspect Binder →</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function openNewAlbumModal() {
-      document.getElementById("new-album-modal").classList.remove("hidden");
-      document.getElementById("new-album-title").value = "";
-      document.getElementById("new-album-box").value = `BOX NO. ${Math.floor(10 + Math.random() * 80)}`;
-      document.getElementById("new-album-desc").value = "";
-    }
-
-    function closeNewAlbumModal() {
-      document.getElementById("new-album-modal").classList.add("hidden");
-    }
-
-    async function saveNewAlbum() {
-      const title = document.getElementById("new-album-title").value.trim();
-      const box = document.getElementById("new-album-box").value.trim();
-      const desc = document.getElementById("new-album-desc").value.trim();
-
-      if (!title) {
-        alert("Please enter a binder title.");
-        return;
-      }
-
-      const newAlbum = {
-        id: `album-${Date.now()}`,
-        title: title,
-        box: box || "BOX NO. ARCHIVE",
-        description: desc || "Custom curated binder.",
-        borderClass: "border-t-[#94662B]"
-      };
-
-      await dbSaveAlbum(newAlbum);
-      userAlbums.push(newAlbum);
-      closeNewAlbumModal();
-      renderAlbums();
-      populateAlbumSelect();
-    }
-
-    function populateAlbumSelect() {
-      const sel = document.getElementById("meta-album-select");
-      if (!sel) return;
-      sel.innerHTML = '<option value="">— Unassigned Negative —</option>';
-      const allAlbums = [...defaultAlbums, ...userAlbums];
-      allAlbums.forEach(a => {
-        const opt = document.createElement("option");
-        opt.value = a.id;
-        opt.innerText = `${a.box}: ${a.title}`;
-        sel.appendChild(opt);
-      });
-    }
-
-    async function assignActivePlateToAlbum(albumId) {
-      const target = currentImages[activeIndex];
-      if (!target) return;
-      target.albumId = albumId;
-      if (target.isCustom || target.id.startsWith("plate-")) {
-        await dbSavePlate(target);
-      }
-      renderAlbums();
     }
 
     // ================= LIGHTBOX VIEWER =================
@@ -1179,18 +841,13 @@
     function updateViewerContent(img) {
       document.getElementById("viewer-img").src = img.url;
       document.getElementById("viewer-title").innerText = img.title;
-      document.getElementById("viewer-caption").innerText = img.caption;
-      document.getElementById("viewer-counter").innerText = `PLATE NO. ${activeIndex + 1} OF ${currentImages.length}`;
+      document.getElementById("viewer-counter").innerText = `PHOTO ${activeIndex + 1} OF ${currentImages.length}`;
 
       document.getElementById("meta-filename").innerText = img.title;
       document.getElementById("meta-size").innerText = img.size;
       document.getElementById("meta-format").innerText = img.format;
       document.getElementById("meta-dims").innerText = `${img.dims} pixels`;
       document.getElementById("meta-hash").innerText = img.hash;
-
-      populateAlbumSelect();
-      const sel = document.getElementById("meta-album-select");
-      if (sel) sel.value = img.albumId || "";
     }
 
     function closeViewer() {
@@ -1274,10 +931,8 @@
           await dbDeletePlate(target.id);
         }
         currentImages.splice(activeIndex, 1);
-        userPlates = userPlates.filter(p => p.id !== target.id);
         closeViewer();
         renderGallery(currentImages);
-        renderAlbums();
       }
     }
 
@@ -1375,7 +1030,7 @@
             const newPlate = {
               id: item.id,
               title: item.original_filename,
-              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Live Optical Camera Exposure // Stored on Bare-Metal Cluster",
+              caption: "",
               size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
               dims: `${item.width} × ${item.height}`,
               format: "JPEG (LIVE CAPTURE)",
@@ -1383,8 +1038,7 @@
               url: urls.url,
               thumbUrl: urls.thumbUrl,
               isServer: true,
-              timestamp: new Date(item.created_at).getTime(),
-              albumId: ""
+              timestamp: new Date(item.created_at).getTime()
             };
             serverPlates.unshift(newPlate);
             currentImages.unshift(newPlate);
@@ -1403,15 +1057,14 @@
         const newPlate = {
           id: `plate-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           title: filename,
-          caption: "Live Optical Camera Exposure // Sanitized Silver Halide Emulsion",
+          caption: "",
           size: "2.8 MB",
           dims: `${canvas.width} × ${canvas.height}`,
           format: "JPEG (LIVE CAPTURE)",
           hash: Array.from(new Uint8Array(32)).map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
           url: dataUrl,
           isCustom: true,
-          timestamp: Date.now(),
-          albumId: ""
+          timestamp: Date.now()
         };
         await dbSavePlate(newPlate);
         userPlates.unshift(newPlate);
@@ -1419,7 +1072,6 @@
       }
 
       renderGallery(currentImages);
-      renderAlbums();
       stopLiveCamera();
 
       const container = document.getElementById("upload-queue-container");
@@ -1485,7 +1137,7 @@
             const newPlate = {
               id: item.id,
               title: item.original_filename,
-              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+              caption: "",
               size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
               dims: `${item.width} × ${item.height}`,
               format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
@@ -1493,8 +1145,7 @@
               url: urls.url,
               thumbUrl: urls.thumbUrl,
               isServer: true,
-              timestamp: new Date(item.created_at).getTime(),
-              albumId: item.album_id || ""
+              timestamp: new Date(item.created_at).getTime()
             };
             serverPlates.unshift(newPlate);
             currentImages.unshift(newPlate);
@@ -1518,15 +1169,14 @@
             const newPlate = {
               id: `plate-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 7)}`,
               title: file.name,
-              caption: "Local Device Archive // Persisted in Offline Storage",
+              caption: "",
               size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
               dims: "Archival High Resolution",
               format: (file.type ? file.type.split("/")[1] : "RAW").toUpperCase(),
               hash: Array.from(new Uint8Array(32)).map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
               url: dataUrl,
               isCustom: true,
-              timestamp: Date.now() + i,
-              albumId: ""
+              timestamp: Date.now() + i
             };
             await dbSavePlate(newPlate);
             userPlates.unshift(newPlate);
@@ -1538,7 +1188,6 @@
       }
 
       renderGallery(currentImages);
-      renderAlbums();
 
       container.innerHTML = `
         <div class="p-3.5 rounded-xl ${serverSuccess ? 'bg-[#F0F5EB] border-[#B3C8A4]' : 'bg-[#FFF8E7] border-[#E0C068]'} border flex items-center justify-between text-xs font-mono">
@@ -1697,7 +1346,7 @@
               const newPlate = {
                 id: item.id,
                 title: item.original_filename,
-                caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+                caption: "",
                 size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
                 dims: `${item.width} × ${item.height}`,
                 format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
@@ -1705,8 +1354,7 @@
                 url: urls.url,
                 thumbUrl: urls.thumbUrl,
                 isServer: true,
-                timestamp: new Date(item.created_at).getTime(),
-                albumId: item.album_id || ""
+                timestamp: new Date(item.created_at).getTime()
               };
               serverPlates.unshift(newPlate);
             });
@@ -1719,9 +1367,8 @@
         }
       }
 
-      currentImages = [...serverPlates, ...userPlates, ...vintageImages];
+      currentImages = [...serverPlates];
       renderGallery(currentImages);
-      renderAlbums();
       updateTelemetryCounters();
 
       if (btn) {
@@ -1761,7 +1408,7 @@
         if (passportEmail) passportEmail.value = user.email || "N/A";
         if (passportName) passportName.value = displayName;
         if (passportStatus) {
-          passportStatus.innerText = "AUTHENTICATED (POSTGRESQL PC 4)";
+          passportStatus.innerText = "AUTHENTICATED";
           passportStatus.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-[#2E4522] text-[#E0EED4] border border-[#4E6F3B]";
         }
         if (passportLoginPrompt) passportLoginPrompt.classList.add("hidden");
@@ -1771,11 +1418,11 @@
         if (loggedInBox) loggedInBox.classList.add("hidden");
         if (headerAvatar) headerAvatar.innerText = "AV";
 
-        if (passportId) passportId.value = "public-unauthenticated-visitor";
-        if (passportEmail) passportEmail.value = "public@vault.swayamruparel.com";
-        if (passportName) passportName.value = localStorage.getItem("vault_user_name") || "Guest Archivist";
+        if (passportId) passportId.value = "not-authenticated";
+        if (passportEmail) passportEmail.value = "none";
+        if (passportName) passportName.value = localStorage.getItem("vault_user_name") || "Guest";
         if (passportStatus) {
-          passportStatus.innerText = "PUBLIC GUEST ACCESS";
+          passportStatus.innerText = "NOT SIGNED IN";
           passportStatus.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]";
         }
         if (passportLoginPrompt) passportLoginPrompt.classList.remove("hidden");
@@ -1992,10 +1639,8 @@
     }
 
     function updateTelemetryCounters() {
-      const isAuth = !!getAuthToken();
-      const allPlates = isAuth ? [...serverPlates] : (serverPlates.length > 0 ? [...serverPlates] : [...vintageImages]);
       const countEl = document.getElementById("settings-plates-count");
-      if (countEl) countEl.innerText = `${allPlates.length} Plates`;
+      if (countEl) countEl.innerText = `${serverPlates.length} Photos`;
 
       // Estimate storage
       const totalMb = (serverPlates.length * 2.8).toFixed(1);
@@ -2008,84 +1653,52 @@
       if (e.key === "Escape") {
         closeViewer();
         closeUploadModal();
-        closeNewAlbumModal();
         closeAuthModal();
       }
       if (e.key === "ArrowLeft") navigateViewer(-1);
       if (e.key === "ArrowRight") navigateViewer(1);
     });
 
-    // Initial load: Datacentre Server + LocalStorage
+    // Initial load: Datacentre Server
     async function initVault() {
       // 1. Sync Authentication UI state
       updateAuthUI();
 
+      const isAuth = !!getAuthToken();
+
       // 2. Fetch Datacentre Plates from server API with auth token
       serverPlates = [];
-      try {
-        const res = await authFetch("/api/v1/images");
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.items) {
-            const token = getAuthToken();
-            serverPlates = data.items.map(item => {
-              const urls = buildPlateUrls(item);
-              return {
-                id: item.id,
-                title: item.original_filename,
-                caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
-                size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
-                dims: `${item.width} × ${item.height}`,
-                format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
-                hash: item.checksum_sha256,
-                url: urls.url,
-                thumbUrl: urls.thumbUrl,
-                isServer: true,
-                timestamp: new Date(item.created_at).getTime(),
-                albumId: item.album_id || ""
-              };
-            });
-          }
-        }
-      } catch (err) {
-        console.warn("Could not query datacentre server API:", err);
-      }
-
-      // 3. Load plates from IndexedDB & deduplicate against datacentre
-      const isAuth = !!getAuthToken();
-      userPlates = [];
-      if (!isAuth) {
+      if (isAuth) {
         try {
-          const rawLocal = await dbGetAllPlates();
-          const serverTitles = new Set(serverPlates.map(p => (p.title || "").toLowerCase().trim()));
-          const serverHashes = new Set(serverPlates.map(p => p.hash).filter(Boolean));
-
-          for (const plate of rawLocal) {
-            const titleKey = (plate.title || "").toLowerCase().trim();
-            if (serverTitles.has(titleKey) || (plate.hash && serverHashes.has(plate.hash))) {
-              await dbDeletePlate(plate.id);
-            } else {
-              userPlates.push(plate);
+          const res = await authFetch("/api/v1/images");
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.items) {
+              serverPlates = data.items.map(item => {
+                const urls = buildPlateUrls(item);
+                return {
+                  id: item.id,
+                  title: item.original_filename,
+                  caption: "",
+                  size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
+                  dims: `${item.width} × ${item.height}`,
+                  format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
+                  hash: item.checksum_sha256,
+                  url: urls.url,
+                  thumbUrl: urls.thumbUrl,
+                  isServer: true,
+                  timestamp: new Date(item.created_at).getTime()
+                };
+              });
             }
           }
-          userPlates.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         } catch (err) {
-          console.warn("Could not load local persisted plates:", err);
-          userPlates = [];
+          console.warn("Could not query datacentre server API:", err);
         }
       }
 
-      // 4. Load albums
-      try {
-        userAlbums = await dbGetAllAlbums();
-      } catch (err) {
-        userAlbums = [];
-      }
-
-      currentImages = isAuth ? [...serverPlates] : (serverPlates.length > 0 ? [...serverPlates] : [...vintageImages]);
+      currentImages = [...serverPlates];
       renderGallery(currentImages);
-      renderAlbums();
-      populateAlbumSelect();
       updateTelemetryCounters();
     }
 
