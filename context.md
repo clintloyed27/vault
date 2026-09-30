@@ -504,3 +504,22 @@ The entire automated pipeline executed with **SUCCESS**:
    - Pushed commits to Gitea and GitHub.
    - Jenkins pipeline `Gitea-CI-Test` executed Build #47 with status **SUCCESS**.
    - Live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
+
+---
+
+## 20. Verified Live Deployment: Build #49 (September 30, 2026)
+
+### Key Capabilities Deployed:
+1. **Blocked Unauthenticated Image Uploads:**
+   - **Backend:** `POST /api/v1/images/upload` strictly depends on `get_current_authenticated_user` in `backend/app/api/deps.py`. Unauthenticated upload requests are rejected with `HTTP 401 Unauthorized` (`detail: Authentication required. Please sign in to upload images.`).
+   - **Frontend:** Header `Upload` button, device camera trigger, file dropzone, and mobile inputs immediately inspect `getAuthToken()`. If unauthenticated, the user is redirected to the Sign In / Register modal with an explanatory prompt, blocking unauthenticated ingestion.
+2. **Streamlined Account Creation Workflow:**
+   - Standard, clean UI (`Create Account` button, `you@example.com` placeholder).
+   - Validated against Pydantic schema and saved in PostgreSQL table `users` on PC4.
+   - Automatically logs in the new user immediately upon registration, saving the session token and setting the `vault_access_token` cookie.
+3. **Empty Gallery State for New Accounts:**
+   - New accounts no longer display dummy demo/vintage photos.
+   - For any authenticated user with zero photos (`serverPlates.length === 0`), the gallery renders the exact prompt: **`Upload your first image`** with an action button to open ingestion.
+4. **CI/CD Build #49:**
+   - Executed via Jenkins pipeline `Gitea-CI-Test` with status **SUCCESS**.
+   - Verified live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
