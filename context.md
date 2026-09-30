@@ -485,3 +485,22 @@ The entire automated pipeline executed with **SUCCESS**:
    - Physical host persistence verified on PC 3 bare-metal disk: `/data/apps/server2026/storage/images/vault-admin-001/12709a00-7f5c-465f-af86-f6c758ee5593.jpg` (permissions `0600`).
    - Central database persistence verified on PC 4 CT106 PostgreSQL: record registered in table `images`.
 
+
+---
+
+## 19. Verified Live Deployment: Build #47 (September 30, 2026)
+
+### Key Fixes Deployed:
+1. **Authenticated Image & Thumbnail Previews:**
+   - **Root Cause:** Standard browser `<img>` tags do not transmit HTTP `Authorization: Bearer <token>` headers. For authenticated users, unauthenticated requests fell back to public admin, returning 404 for private user photos (BOLA/IDOR protection).
+   - **Backend Fix:** Updated `get_current_user` in `backend/app/api/deps.py` to accept authentication via:
+     - Header: `Authorization: Bearer <token>`
+     - Query Parameter: `?token=<jwt_token>` (for `<img>` src)
+     - Cookie: `vault_access_token`
+   - **Frontend Fix:** Added `buildPlateUrls(item)` in `index.html` and `preview.html` to append `?token=<jwt_token>` to image/thumbnail URLs, and manage `vault_access_token` cookies upon login, refresh, and logout.
+2. **Simplified Deletion Confirmation:**
+   - Replaced pretentious prompt `Incinerate negative plate "" permanently?` with standard, clear confirmation: `Are you sure you want to permanently delete ""?`.
+3. **CI/CD Build #47:**
+   - Pushed commits to Gitea and GitHub.
+   - Jenkins pipeline `Gitea-CI-Test` executed Build #47 with status **SUCCESS**.
+   - Live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
