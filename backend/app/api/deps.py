@@ -61,6 +61,38 @@ def get_current_user(
     return user
 
 
+def get_current_authenticated_user(
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    token_param: Optional[str] = Query(None, alias="token"),
+    token_cookie: Optional[str] = Cookie(None, alias="vault_access_token"),
+) -> User:
+    """
+    Strict authentication required.
+    Does NOT allow public/guest fallback. Unauthenticated requests are rejected with 401.
+    """
+    token = (credentials.credentials if credentials and credentials.credentials else None) or token_param or token_cookie
+    if not token:
+        raise AuthenticationError("Authentication required. Please sign in to upload images.")
+
+    try:
+        payload = decode_token(token)
+        user_id: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        if not user_id or token_type != "access":
+            raise AuthenticationError("Invalid token claims")
+    except jwt.PyJWTError:
+        raise AuthenticationError("Invalid or expired access token")
+
+    user = UserRepository.get_by_id(db, user_id=user_id)
+    if not user:
+        raise AuthenticationError("User associated with token no longer exists")
+    if not user.is_active:
+        raise AuthenticationError("User account has been deactivated")
+
+    return user
+
+
 def get_current_active_superuser(
     current_user: User = Depends(get_current_user),
 ) -> User:

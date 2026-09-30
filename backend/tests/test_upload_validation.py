@@ -61,3 +61,13 @@ def test_successful_upload_creates_thumbnail_and_dimensions(
     thumb_res = client.get(f"/api/v1/images/{data['id']}/thumbnail", headers=auth_header_user_a)
     assert thumb_res.status_code == 200
     assert thumb_res.headers["content-type"] == "image/webp"
+
+
+def test_unauthenticated_upload_rejected(client, sample_jpeg_bytes):
+    """Uploading without authentication must return 401 Unauthorized."""
+    res = client.post(
+        "/api/v1/images/upload",
+        files={"files": ("anonymous.jpg", sample_jpeg_bytes, "image/jpeg")},
+    )
+    assert res.status_code == 401
+    assert "authentication required" in res.json()["detail"].lower()

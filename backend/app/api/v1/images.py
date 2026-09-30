@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, Response, UploadFile, statu
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_authenticated_user, get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.image import ImageListResponse, ImageResponse, ImageUpdate
@@ -16,7 +16,7 @@ router = APIRouter()
 @router.post("/upload", response_model=List[ImageResponse], status_code=status.HTTP_201_CREATED)
 async def upload_images(
     files: List[UploadFile] = File(...),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -140,7 +140,7 @@ def download_image(
 def update_image(
     image_id: str,
     payload: ImageUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db),
 ):
     """Rename original filename."""
@@ -158,7 +158,7 @@ def update_image(
 @router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_image(
     image_id: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db),
 ):
     """Permanently delete an image and its physical storage files."""
