@@ -567,9 +567,13 @@ The entire automated pipeline executed with **SUCCESS**:
    `set $port 80;`
 3. Reloaded Nginx in NPM (`docker exec nginx-proxy-manager nginx -s reload`).
 4. Purged dead containers from Docker (`docker rm -f dreamy_montalcini happy_raman wizardly_heisenberg`).
-5. **Verification:**
-   - `cloudflared` ingress logs now route cleanly without context cancellations or timeouts.
-   - Nginx Proxy Manager logs confirm: `[Sent-to server2026-web]` with `HTTP 200 OK`.
-   - Domain response time dropped from 100s timeout &rarr; **0.79s - 1.1s** average across requests.
+5. **Enforced Cloudflare Tunnel HTTP/2 Multiplexing:**
+   - **Root Cause for Error 524 on remote/mobile/iCloud Private Relay connections (e.g. Marseille, France):** By default, `cloudflared` defaults to QUIC protocol (UDP 7844). On local ISP networks with aggressive UDP rate-limiting, MTU blackholes, or CGNAT connection drops, QUIC connections silently stalled cross-region requests from foreign Cloudflare edge points (e.g. Apple iCloud Private Relay egress in Europe).
+   - **Fix:** Enforced `--protocol http2` in `cloudflared` (`command: tunnel --no-autoupdate --protocol http2 run` in `/root/network/docker-compose.yml`), binding all 4 tunnel connections to reliable, persistent TCP streams with TLS.
+6. **Verification:**
+   - `cloudflared` connects to `bom06`, `bom09`, `bom10` over HTTP/2 without packet drop.
+   - Nginx Proxy Manager access logs confirm immediate forwarding to `server2026-web` with `HTTP 200 OK`.
+   - Domain response time stabilized at ~0.8s - 1.0s.
+
 
 
