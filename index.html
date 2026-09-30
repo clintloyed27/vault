@@ -192,6 +192,24 @@
       </div>
     </div>
 
+    <!-- Local Offline Plates Banner / Sync Trigger -->
+    <div id="local-sync-banner" class="hidden mb-6 p-4 rounded-xl bg-[#FAF6EE] border border-[#C79A59] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm font-mono text-xs animate-in fade-in">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-[#B28242] text-white flex items-center justify-center font-bold text-sm shadow-inner">
+          ☁️
+        </div>
+        <div>
+          <p id="local-sync-count" class="font-bold text-[#2A221C]">0 photo(s) stored locally in browser storage</p>
+          <p class="text-[11px] text-[#7A6B5F]">Migrate these plates to physical datacentre bare-metal storage on PC 3.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="local-sync-btn" onclick="syncLocalPlatesToDatacentre()" class="px-3.5 py-1.5 bg-[#2E4522] hover:bg-[#203118] text-[#E0EED4] rounded-lg font-bold border border-[#4E6F3B] transition flex items-center gap-1.5 shadow">
+          <span>Sync to Datacentre</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Gallery Grid (Vintage Print Frames) -->
     <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
       <!-- Dynamically filled by JS -->
@@ -894,6 +912,18 @@
       });
     }
 
+    function dataURLtoBlob(dataurl) {
+      const parts = dataurl.split(',');
+      const mime = parts[0].match(/:(.*?);/)[1];
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    }
+
     // ================= GALLERY RENDERING & SEARCH =================
     function renderGallery(imagesToRender) {
       const grid = document.getElementById("image-grid");
@@ -940,6 +970,17 @@
 
       document.getElementById("photo-counter").innerText = `${imagesToRender.length} photos`;
       updateTelemetryCounters();
+
+      const banner = document.getElementById("local-sync-banner");
+      const countLabel = document.getElementById("local-sync-count");
+      if (banner && countLabel) {
+        if (userPlates.length > 0) {
+          countLabel.innerText = `${userPlates.length} photo(s) stored locally in browser storage`;
+          banner.classList.remove("hidden");
+        } else {
+          banner.classList.add("hidden");
+        }
+      }
     }
 
     function applyActiveFilter() {
@@ -1172,10 +1213,7 @@
       if (!target) return;
       if (target.isServer) {
         try {
-          const token = getAuthToken();
-          const headers = {};
-          if (token) headers["Authorization"] = `Bearer ${token}`;
-          const res = await fetch(`/api/v1/images/${target.id}/download`, { headers });
+          const res = await authFetch(`/api/v1/images/${target.id}/download`);
           if (res.ok) {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
@@ -1208,10 +1246,7 @@
       if (confirm(`Incinerate negative plate "${target.title}" permanently?`)) {
         if (target.isServer) {
           try {
-            const token = getAuthToken();
-            const headers = {};
-            if (token) headers["Authorization"] = `Bearer ${token}`;
-            await fetch(`/api/v1/images/${target.id}`, { method: "DELETE", headers });
+            await authFetch(`/api/v1/images/${target.id}`, { method: "DELETE" });
             serverPlates = serverPlates.filter(p => p.id !== target.id);
           } catch (err) {
             console.error("Datacentre delete error:", err);
@@ -1293,6 +1328,7 @@
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
 
       let serverSuccess = false;
+      let serverErrorMsg = "";
       const filename = `camera_exposure_${Date.now()}.jpg`;
 
       // 1. Try streaming directly to Datacentre Server API
@@ -1300,17 +1336,18 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.92));
         const formData = new FormData();
         formData.append("files", blob, filename);
-        const res = await fetch("/api/v1/images/upload", {
+        const res = await authFetch("/api/v1/images/upload", {
           method: "POST",
           body: formData
         });
         if (res.ok) {
           const data = await res.json();
+          const token = getAuthToken();
           data.forEach(item => {
             const newPlate = {
               id: item.id,
               title: item.original_filename,
-              caption: "Live Optical Camera Exposure // Stored on Bare-Metal Cluster",
+              caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Live Optical Camera Exposure // Stored on Bare-Metal Cluster",
               size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
               dims: `${item.width} × ${item.height}`,
               format: "JPEG (LIVE CAPTURE)",
@@ -1325,8 +1362,11 @@
             currentImages.unshift(newPlate);
           });
           serverSuccess = true;
+        } else {
+          serverErrorMsg = `HTTP ${res.status}`;
         }
       } catch (err) {
+        serverErrorMsg = err.message || "Network Error";
         console.warn("Server camera upload failed, falling back to local storage:", err);
       }
 
@@ -1356,22 +1396,26 @@
 
       const container = document.getElementById("upload-queue-container");
       container.innerHTML = `
-        <div class="p-3.5 rounded-xl bg-[#F0F5EB] border border-[#B3C8A4] flex items-center justify-between text-xs font-mono">
+        <div class="p-3.5 rounded-xl ${serverSuccess ? 'bg-[#F0F5EB] border-[#B3C8A4]' : 'bg-[#FFF8E7] border-[#E0C068]'} border flex items-center justify-between text-xs font-mono">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[#2E4522] text-[#E0EED4] flex items-center justify-center font-bold">✓</div>
+            <div class="w-8 h-8 rounded-lg ${serverSuccess ? 'bg-[#2E4522] text-[#E0EED4]' : 'bg-[#B28242] text-white'} flex items-center justify-center font-bold">
+              ${serverSuccess ? '✓' : '⚠️'}
+            </div>
             <div>
               <p class="font-semibold text-[#203118]">${filename}</p>
-              <p class="text-[10px] text-[#4E6F3B]">${serverSuccess ? "Captured & stored directly on datacentre server" : "Captured & persisted locally"}</p>
+              <p class="text-[10px] ${serverSuccess ? 'text-[#4E6F3B]' : 'text-[#8C6B14]'}">
+                ${serverSuccess ? "Captured & stored directly on datacentre server" : `Captured & persisted locally (${serverErrorMsg || 'offline'})`}
+              </p>
             </div>
           </div>
-          <span class="text-[#2E4522] font-semibold">Done</span>
+          <span class="${serverSuccess ? 'text-[#2E4522]' : 'text-[#8C6B14]'} font-semibold">Done</span>
         </div>
       `;
 
       setTimeout(() => {
         closeUploadModal();
         container.innerHTML = "";
-      }, 1000);
+      }, 1200);
     }
 
     async function handleGalleryFileInput(files) {
@@ -1385,22 +1429,21 @@
 
       // 1. Try uploading directly to Datacentre Server API
       let serverSuccess = false;
+      let serverErrorMsg = "";
       try {
         const formData = new FormData();
         for (let i = 0; i < files.length; i++) {
           formData.append("files", files[i]);
         }
-        const token = getAuthToken();
-        const uploadHeaders = {};
-        if (token) uploadHeaders["Authorization"] = `Bearer ${token}`;
 
-        const res = await fetch("/api/v1/images/upload", {
+        const res = await authFetch("/api/v1/images/upload", {
           method: "POST",
-          headers: uploadHeaders,
           body: formData
         });
+
         if (res.ok) {
           const data = await res.json();
+          const token = getAuthToken();
           data.forEach(item => {
             const newPlate = {
               id: item.id,
@@ -1420,8 +1463,12 @@
             currentImages.unshift(newPlate);
           });
           serverSuccess = true;
+        } else {
+          serverErrorMsg = `HTTP ${res.status}`;
+          console.warn("Datacentre API returned non-OK status:", res.status);
         }
       } catch (netErr) {
+        serverErrorMsg = netErr.message || "Network Error";
         console.warn("Datacentre API upload failed, falling back to local storage:", netErr);
       }
 
@@ -1457,22 +1504,26 @@
       renderAlbums();
 
       container.innerHTML = `
-        <div class="p-3.5 rounded-xl bg-[#F0F5EB] border border-[#B3C8A4] flex items-center justify-between text-xs font-mono">
+        <div class="p-3.5 rounded-xl ${serverSuccess ? 'bg-[#F0F5EB] border-[#B3C8A4]' : 'bg-[#FFF8E7] border-[#E0C068]'} border flex items-center justify-between text-xs font-mono">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[#2E4522] text-[#E0EED4] flex items-center justify-center font-bold">✓</div>
+            <div class="w-8 h-8 rounded-lg ${serverSuccess ? 'bg-[#2E4522] text-[#E0EED4]' : 'bg-[#B28242] text-white'} flex items-center justify-center font-bold">
+              ${serverSuccess ? '✓' : '⚠️'}
+            </div>
             <div>
               <p class="font-semibold text-[#203118]">${files.length} Negative Plate(s) Ingested</p>
-              <p class="text-[10px] text-[#4E6F3B]">${serverSuccess ? "Committed directly to bare-metal datacentre disk" : "Saved in local browser vault"}</p>
+              <p class="text-[10px] ${serverSuccess ? 'text-[#4E6F3B]' : 'text-[#8C6B14]'}">
+                ${serverSuccess ? "Committed directly to bare-metal datacentre disk" : `Saved in local browser (${serverErrorMsg || 'offline'})`}
+              </p>
             </div>
           </div>
-          <span class="text-[#2E4522] font-semibold">Done</span>
+          <span class="${serverSuccess ? 'text-[#2E4522]' : 'text-[#8C6B14]'} font-semibold">Done</span>
         </div>
       `;
 
       setTimeout(() => {
         closeUploadModal();
         container.innerHTML = "";
-      }, 1200);
+      }, 1400);
     }
 
     function handleMobileCameraInput(files) {
@@ -1516,6 +1567,107 @@
       localStorage.removeItem("vault_user_info");
       localStorage.removeItem("vault_user_name");
       updateAuthUI();
+    }
+
+    async function authFetch(url, options = {}) {
+      let token = getAuthToken();
+      const headers = new Headers(options.headers || {});
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      let res = await fetch(url, { ...options, headers });
+      if (res.status === 401) {
+        try {
+          const refreshRes = await fetch("/api/v1/auth/refresh", {
+            method: "POST",
+            credentials: "include"
+          });
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            setAuthSession(data.access_token, data.user);
+            headers.set("Authorization", `Bearer ${data.access_token}`);
+            res = await fetch(url, { ...options, headers });
+          } else {
+            clearAuthSession();
+            headers.delete("Authorization");
+            res = await fetch(url, { ...options, headers });
+          }
+        } catch (err) {
+          clearAuthSession();
+          headers.delete("Authorization");
+          res = await fetch(url, { ...options, headers });
+        }
+      }
+      return res;
+    }
+
+    async function syncLocalPlatesToDatacentre() {
+      const btn = document.getElementById("local-sync-btn");
+      if (!userPlates || userPlates.length === 0) return;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-spin">⏳</span> Syncing...`;
+      }
+
+      let synced = 0;
+      const platesToSync = [...userPlates];
+
+      for (const plate of platesToSync) {
+        try {
+          if (!plate.url || !plate.url.startsWith("data:")) {
+            continue;
+          }
+          const blob = dataURLtoBlob(plate.url);
+          const filename = plate.title || `synced_plate_${Date.now()}.jpg`;
+          const formData = new FormData();
+          formData.append("files", blob, filename);
+
+          const res = await authFetch("/api/v1/images/upload", {
+            method: "POST",
+            body: formData
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const token = getAuthToken();
+            data.forEach(item => {
+              const newPlate = {
+                id: item.id,
+                title: item.original_filename,
+                caption: token ? "Private Archive // Stored on PC 3 Datacentre Disk" : "Datacentre Server Archive // Stored on Bare-Metal Cluster",
+                size: `${(item.file_size / (1024 * 1024)).toFixed(1)} MB`,
+                dims: `${item.width} × ${item.height}`,
+                format: (item.mime_type.split("/")[1] || "JPEG").toUpperCase(),
+                hash: item.checksum_sha256,
+                url: `/api/v1/images/${item.id}/file`,
+                thumbUrl: `/api/v1/images/${item.id}/thumbnail`,
+                isServer: true,
+                timestamp: new Date(item.created_at).getTime(),
+                albumId: item.album_id || ""
+              };
+              serverPlates.unshift(newPlate);
+            });
+            await dbDeletePlate(plate.id);
+            userPlates = userPlates.filter(p => p.id !== plate.id);
+            synced++;
+          }
+        } catch (err) {
+          console.error("Failed to sync plate:", plate.title, err);
+        }
+      }
+
+      currentImages = [...serverPlates, ...userPlates, ...vintageImages];
+      renderGallery(currentImages);
+      renderAlbums();
+      updateTelemetryCounters();
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `✓ Synced ${synced} Plate(s)`;
+        setTimeout(() => {
+          btn.innerHTML = `Sync to Datacentre`;
+        }, 2000);
+      }
     }
 
     function updateAuthUI() {
@@ -1805,14 +1957,11 @@
       // 2. Fetch Datacentre Plates from server API with auth token
       serverPlates = [];
       try {
-        const token = getAuthToken();
-        const headers = {};
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-
-        const res = await fetch("/api/v1/images", { headers });
+        const res = await authFetch("/api/v1/images");
         if (res.ok) {
           const data = await res.json();
           if (data && data.items) {
+            const token = getAuthToken();
             serverPlates = data.items.map(item => ({
               id: item.id,
               title: item.original_filename,
@@ -1833,9 +1982,22 @@
         console.warn("Could not query datacentre server API:", err);
       }
 
-      // 3. Load plates from IndexedDB
+      // 3. Load plates from IndexedDB & deduplicate against datacentre
       try {
-        userPlates = await dbGetAllPlates();
+        const rawLocal = await dbGetAllPlates();
+        const serverTitles = new Set(serverPlates.map(p => (p.title || "").toLowerCase().trim()));
+        const serverHashes = new Set(serverPlates.map(p => p.hash).filter(Boolean));
+
+        userPlates = [];
+        for (const plate of rawLocal) {
+          const titleKey = (plate.title || "").toLowerCase().trim();
+          if (serverTitles.has(titleKey) || (plate.hash && serverHashes.has(plate.hash))) {
+            // Already safely in datacentre storage, remove local duplicate
+            await dbDeletePlate(plate.id);
+          } else {
+            userPlates.push(plate);
+          }
+        }
         userPlates.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       } catch (err) {
         console.warn("Could not load local persisted plates:", err);

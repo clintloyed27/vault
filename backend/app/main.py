@@ -2,7 +2,7 @@ import app.compat  # noqa: F401
 import time
 import uuid
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -115,6 +115,10 @@ async def serve_index():
             return FileResponse(candidate)
     return JSONResponse(status_code=404, content={"detail": "index.html not found"})
 
+@app.head("/", include_in_schema=False)
+async def head_index():
+    return Response(status_code=200)
+
 @app.get("/preview.html", include_in_schema=False)
 async def serve_preview():
     for candidate in ["/app/preview.html", "preview.html", os.path.join(os.path.dirname(__file__), "..", "..", "preview.html")]:
@@ -130,6 +134,10 @@ def root_health():
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
     }
+
+@app.head("/health", tags=["Health"], include_in_schema=False)
+def head_health():
+    return Response(status_code=200)
 
 
 @app.get("/readiness", tags=["Health"])
