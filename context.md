@@ -546,3 +546,30 @@ The entire automated pipeline executed with **SUCCESS**:
    - Pushed to Gitea and GitHub; automated pipeline Build #50 executed with status **SUCCESS**.
    - Verified live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
 
+---
+
+## 22. Ingress & Cloudflare Routing Architecture Resolution (September 30, 2026)
+
+### Incident & Root Cause Analysis:
+- **Symptom:** `vault.swayamruparel.com` intermittently stalled, took minutes to load, or timed out with Cloudflare Error 524 ("A timeout occurred"), while direct LAN access `http://172.16.20.12:8080` was fast.
+- **Root Cause:**
+  1. `cloudflared` routes ingress traffic into PC3 via `network_tunnel-net` to `http://nginx-proxy-manager:80`.
+  2. In Nginx Proxy Manager (`/root/network/data/database.sqlite` and `/root/network/data/nginx/proxy_host/1.conf`), proxy host #1 for `vault.swayamruparel.com` was misconfigured with:
+     `forward_host = "dreamy_montalcini"` (an ancient, exited container from 5 days ago).
+  3. When Nginx dynamically resolved `$server` via Docker's embedded DNS (`127.0.0.11`), it repeatedly failed or timed out (`dreamy_montalcini could not be resolved (3: Host not found)`), triggering upstream resets and Cloudflare 524 timeouts.
+  4. Stale exited containers (`dreamy_montalcini`, `happy_raman`, `wizardly_heisenberg`) were lingering on the `network_tunnel-net` bridge network, polluting internal DNS mappings.
+
+### Resolution Deployed:
+1. Updated Nginx Proxy Manager SQLite database:
+   `UPDATE proxy_host SET forward_host = 'server2026-web', forward_port = 80 WHERE id = 1;`
+2. Updated `/root/network/data/nginx/proxy_host/1.conf`:
+   `set $server "server2026-web";`
+   `set $port 80;`
+3. Reloaded Nginx in NPM (`docker exec nginx-proxy-manager nginx -s reload`).
+4. Purged dead containers from Docker (`docker rm -f dreamy_montalcini happy_raman wizardly_heisenberg`).
+5. **Verification:**
+   - `cloudflared` ingress logs now route cleanly without context cancellations or timeouts.
+   - Nginx Proxy Manager logs confirm: `[Sent-to server2026-web]` with `HTTP 200 OK`.
+   - Domain response time dropped from 100s timeout &rarr; **0.79s - 1.1s** average across requests.
+
+
