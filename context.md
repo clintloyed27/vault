@@ -523,3 +523,26 @@ The entire automated pipeline executed with **SUCCESS**:
 4. **CI/CD Build #49:**
    - Executed via Jenkins pipeline `Gitea-CI-Test` with status **SUCCESS**.
    - Verified live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
+
+---
+
+## 21. Verified Live Deployment: Build #50 (September 30, 2026)
+
+### Key Cleanup Deployed:
+1. **Purged Pretentious Security & Crypto Jargon from Settings:**
+   - Removed `Cipher Standard: Argon2id` and `RFC 9106 (64MB RAM hardness)`.
+   - Removed `SECURITY REGISTRY`, `Archival Registry & Cryptography Parameters`, and `Argon2id Memory-Hard Cipher & Server-Side Tenancy Isolation`.
+   - Removed `Cataloged Plates`, `7 Plates`, and `Zero BOLA Cross-Tenant Leaks`.
+   - Settings telemetry now displays clean metrics: **Storage Used** and **Total Photos**.
+2. **Purged Albums Feature:**
+   - Completely removed Albums navigation tab, album creation modal, album assignment dropdowns, album filter indicator, and associated JS persistence logic.
+3. **Purged Injected Preview Captions:**
+   - Removed `PRIVATE ARCHIVE // STORED ON PC 3 DATACENTRE DISK` captions beneath image previews and in gallery cards.
+4. **Purged Default Photos:**
+   - Deleted hardcoded `vintageImages` demo photo objects so fresh/empty vaults cleanly show **`Upload your first image`**.
+5. **Renamed Tenant Archival Passport to Database Details:**
+   - Renamed "Tenant Archival Passport" and "Derived strictly from JWT signature tokens authenticated with PostgreSQL on PC 4." to **Database Details** (`User profile and database connection details.`).
+6. **CI/CD Build #50:**
+   - Pushed to Gitea and GitHub; automated pipeline Build #50 executed with status **SUCCESS**.
+   - Verified live on `http://172.16.20.12:8080` and `https://vault.swayamruparel.com`.
+
