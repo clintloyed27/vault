@@ -453,13 +453,35 @@ The entire automated pipeline executed with **SUCCESS**:
 
 ---
 
-## 17. Datacentre Storage Status & Next Session Roadmap
+## 17. Datacentre Storage Status & Frontend Ingestion Resolution
 
-1. **Backend Storage API Verified:**
-   - Image upload via API (`POST /api/v1/images/upload` with form field `files`) was tested and verified live on `https://vault.swayamruparel.com`.
-   - The test image was successfully written to the PC3 host disk mount (`/data/apps/server2026/storage/images/`) and registered in PostgreSQL.
-2. **Observation for Frontend Web Ingestion:**
-   - In `index.html` / `preview.html`, when a user uploads without signing in, the frontend currently falls back to storing in the browser's IndexedDB.
-   - When the user signs in with their account via the `[Sign In]` modal, the frontend attaches the Bearer token and uploads directly to the datacentre backend API.
-   - **Next Session Item:** Wire unauthenticated guest uploads directly to the datacentre API under the public default admin (`vault-admin-001`) so that even visitors who haven't logged in immediately upload to the datacentre, or prompt the login modal upon clicking "Upload".
+1. **Root Cause Analysis of Local-Only Badges:**
+   - Previous offline or container-downtime uploads were cached inside the client's browser IndexedDB (`VaultArchiveDB`, store `uploaded_plates`) with `isCustom: true`, which permanently displayed the gold `LOCAL` badge on those plates even when the server recovered.
+   - When a 15-minute JWT access token expired in `localStorage`, subsequent upload requests returned `401 Unauthorized`. The frontend previously caught this without auto-refreshing the token or falling back to public gallery ingestion, silently storing the image in local IndexedDB.
+2. **Frontend Architecture Fixes Deployed (Commit `5d6d996`):**
+   - **`authFetch(url, options)` Middleware:** Automatically injects JWT Bearer headers, intercepts `401 Unauthorized` responses, attempts silent access token refresh via `POST /api/v1/auth/refresh` (using the HTTPOnly cookie), updates `localStorage`, and retries. If the session has completely expired, it cleanly purges the dead token and retries under public access (`ALLOW_PUBLIC_GALLERY=true`), eliminating silent 401 fallbacks.
+   - **Automatic Deduplication on Startup:** `initVault()` now queries the datacentre server API first. Any plates already present on the datacentre (by filename or checksum) are automatically cleaned out of the client's IndexedDB, instantly replacing duplicate `LOCAL` plates with green `DATACENTRE` plates.
+   - **One-Click Local &rarr; Datacentre Migration Banner:** If the client browser holds any unique offline plates in IndexedDB, a prominent migration banner appears: `☁️ X photo(s) stored locally in browser storage [Sync to Datacentre]`. Clicking it converts the plates from Data URLs to Blobs, streams them to `POST /api/v1/images/upload`, registers them in PostgreSQL on PC 4, persists them to PC 3 bare-metal storage, deletes the local IndexedDB entries, and renders them with emerald `DATACENTRE` badges.
+   - **HEAD Route Support:** Added `@app.head("/")` and `@app.head("/health")` to `backend/app/main.py` to prevent `405 Method Not Allowed` when checked by uptime probes or `curl -I`.
+
+---
+
+## 18. Verified Live Deployment: Build #46 (September 30, 2026)
+
+The entire automated pipeline executed with **SUCCESS**:
+
+1. **Pipeline & Infrastructure Update:**
+   - Configured Jenkins job `Gitea-CI-Test` to deploy `server2026-web` attached to `--network network_tunnel-net` with both aliases:
+     `--network-alias dreamy_montalcini --network-alias server2026-web`
+     This eliminates all potential 502 Bad Gateway proxy errors when Nginx Proxy Manager queries either hostname.
+2. **Build & Release Flow:**
+   - Source code committed and pushed to `gitea` (`http://172.16.20.100:3000/root/server2026-test.git`) and `github` (`https://github.com/gitruparel/photo-vault.git`).
+   - Jenkins Build #46 executed all stages: Checkout &rarr; Build &rarr; SonarQube &rarr; Package Artifact &rarr; Nexus Upload &rarr; PC3 Docker Build &rarr; Nexus Docker Push (`172.16.20.103:8082/server2026-test:46`) &rarr; PC3 Docker Deploy (`server2026-web`) &rarr; Verify Deployment.
+3. **End-to-End Verification on `https://vault.swayamruparel.com`:**
+   - `curl -I https://vault.swayamruparel.com` &rarr; **HTTP/1.1 200 OK**.
+   - `GET https://vault.swayamruparel.com/health` &rarr; **HTTP 200** `{"status":"healthy","service":"Vault","version":"1.0.0"}`.
+   - Live image upload verified via `POST /api/v1/images/upload` (`live_build46_verification.jpg`): returned **HTTP 201 Created**.
+   - File retrieval (`GET /api/v1/images/{id}/file`) & thumbnail retrieval (`GET /api/v1/images/{id}/thumbnail`): **HTTP 200 OK**.
+   - Physical host persistence verified on PC 3 bare-metal disk: `/data/apps/server2026/storage/images/vault-admin-001/12709a00-7f5c-465f-af86-f6c758ee5593.jpg` (permissions `0600`).
+   - Central database persistence verified on PC 4 CT106 PostgreSQL: record registered in table `images`.
 
