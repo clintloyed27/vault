@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>VAULT — Archival Negative & Print Repository</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,6 +47,14 @@
     }
   </script>
   <style>
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
     body {
       background-color: #F8F5EE;
       color: #2D2520;
@@ -55,6 +63,7 @@
         radial-gradient(#E8E1D3 0.75px, #F8F5EE 0.75px);
       background-size: 30px 30px;
       background-position: 0 0, 15px 15px;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .vintage-card {
@@ -72,8 +81,13 @@
     .print-frame {
       background: #FFFFFF;
       box-shadow: inset 0 0 0 1px #E7E0D3, 0 4px 12px rgba(45, 37, 32, 0.08);
-      padding: 10px 10px 32px 10px;
+      padding: 8px 8px 24px 8px;
       transition: all 0.3s ease;
+    }
+    @media (min-width: 640px) {
+      .print-frame {
+        padding: 10px 10px 32px 10px;
+      }
     }
     .print-frame:hover {
       box-shadow: inset 0 0 0 1px #B28242, 0 12px 28px rgba(45, 37, 32, 0.15);
@@ -92,30 +106,41 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-[#B28242] selection:text-white">
+<body class="min-h-screen flex flex-col font-sans selection:bg-[#B28242] selection:text-white overflow-x-hidden">
 
   <!-- ================= CLEAN TOP MASTHEAD ================= -->
   <header class="sticky top-0 z-40 w-full bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E5DCD0]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
       
       <!-- Brand & Navigation -->
-      <div class="flex items-center gap-8">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('gallery')">
-          <span class="font-serif text-xl font-bold tracking-wider text-[#2A221C]">VAULT</span>
+      <div class="flex items-center gap-2 sm:gap-5 md:gap-8">
+        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="switchTab('gallery')">
+          <span class="font-serif text-lg sm:text-xl font-bold tracking-wider text-[#2A221C]">VAULT</span>
         </div>
 
-        <nav class="flex items-center gap-1 text-xs font-mono tracking-wider uppercase">
-          <button id="tab-gallery-btn" onclick="switchTab('gallery')" class="px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm">
+        <nav class="flex items-center gap-1 text-[11px] sm:text-xs font-mono tracking-wider uppercase">
+          <button id="tab-gallery-btn" onclick="switchTab('gallery')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm">
             Photos
           </button>
-          <button id="tab-settings-btn" onclick="switchTab('settings')" class="px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
+          <button id="tab-settings-btn" onclick="switchTab('settings')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]">
             Settings
           </button>
         </nav>
       </div>
 
       <!-- Right Controls: Search, Upload & User Auth -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-3">
+        <!-- Mobile Search Toggle -->
+        <button
+          onclick="toggleMobileSearch()"
+          class="sm:hidden p-1.5 rounded-lg text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC] transition"
+          title="Search Photos"
+          aria-label="Search Photos"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </button>
+
+        <!-- Desktop Search -->
         <div class="relative hidden sm:block w-44 md:w-56">
           <svg class="w-3.5 h-3.5 text-[#8C7D6F] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input
@@ -127,38 +152,42 @@
           />
         </div>
 
+        <!-- Upload Button -->
         <button
           onclick="openUploadModal()"
-          class="flex items-center gap-1.5 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-[#7A5B36] transition shadow-sm active:scale-95"
+          class="flex items-center gap-1.5 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-[11px] sm:text-xs font-mono uppercase tracking-wider px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-[#7A5B36] transition shadow-sm active:scale-95"
+          title="Upload Negative Plate"
         >
           <svg class="w-3.5 h-3.5 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          <span>Upload</span>
+          <span class="hidden sm:inline">Upload</span>
         </button>
 
         <!-- Dynamic Auth Button / Profile Capsule -->
-        <div id="auth-header-container" class="flex items-center gap-2">
+        <div id="auth-header-container" class="flex items-center gap-1.5 sm:gap-2">
           <!-- Unauthenticated state button -->
           <button
             id="auth-login-trigger-btn"
             onclick="openAuthModal('login')"
-            class="flex items-center gap-1.5 bg-[#FAF6EE] hover:bg-[#F0E6D5] text-[#2A221C] text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-lg border border-[#C5B49D] transition shadow-sm"
+            class="flex items-center gap-1.5 bg-[#FAF6EE] hover:bg-[#F0E6D5] text-[#2A221C] text-[11px] sm:text-xs font-mono uppercase tracking-wider px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#C5B49D] transition shadow-sm"
+            title="Sign In"
           >
             <svg class="w-3.5 h-3.5 text-[#94662B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span>Sign In</span>
+            <span class="hidden sm:inline">Sign In</span>
           </button>
 
           <!-- Authenticated state badge & avatar -->
-          <div id="auth-logged-in-box" class="hidden flex items-center gap-2">
-            <div onclick="switchTab('settings')" class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#FAF6EE] border border-[#D5C8B4] cursor-pointer hover:bg-white transition" title="Archivist Profile">
+          <div id="auth-logged-in-box" class="hidden flex items-center gap-1 sm:gap-2">
+            <div onclick="switchTab('settings')" class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-lg bg-[#FAF6EE] border border-[#D5C8B4] cursor-pointer hover:bg-white transition" title="Archivist Profile">
               <div id="header-avatar" class="w-6 h-6 rounded-full bg-[#3D322B] text-[#F4ECE0] flex items-center justify-center font-serif text-[10px] font-bold border border-[#8C6D46]">
                 AV
               </div>
-              <span id="header-user-label" class="text-xs font-mono text-[#2A221C] font-semibold max-w-[100px] truncate hidden md:inline">Alice Vault</span>
+              <span id="header-user-label" class="text-xs font-mono text-[#2A221C] font-semibold max-w-[80px] sm:max-w-[100px] truncate hidden md:inline">Alice Vault</span>
             </div>
             <button
               onclick="logoutUser()"
               title="Sign Out"
-              class="p-1.5 rounded-lg text-[#7A6B5F] hover:text-[#2A221C] hover:bg-[#EFE8DC] transition text-xs font-mono"
+              class="p-1 sm:p-1.5 rounded-lg text-[#7A6B5F] hover:text-[#2A221C] hover:bg-[#EFE8DC] transition text-xs font-mono"
+              aria-label="Sign Out"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             </button>
@@ -166,15 +195,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Collapsible Search Bar -->
+    <div id="mobile-search-bar" class="hidden sm:hidden px-3 pb-2.5 pt-1 border-t border-[#E5DCD0]/60 bg-[#FAF6EE]">
+      <div class="relative w-full">
+        <svg class="w-3.5 h-3.5 text-[#8C7D6F] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input
+          id="mobile-search-input"
+          type="text"
+          oninput="handleSearch(this.value)"
+          placeholder="Search photographs..."
+          class="w-full bg-[#F3ECE0] border border-[#DDD3C2] rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono text-[#2A221C] placeholder-[#8F8174] focus:outline-none focus:border-[#B28242] focus:bg-white transition"
+        />
+      </div>
+    </div>
   </header>
 
   <!-- ================= TAB: PHOTOGRAPHS GALLERY ================= -->
-  <main id="tab-gallery" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main id="tab-gallery" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
     
     <!-- Clean Minimal Header -->
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-[#E6DDD0]">
+    <div class="flex items-center justify-between pb-3 sm:pb-4 mb-4 sm:mb-6 border-b border-[#E6DDD0]">
       <div class="flex items-baseline gap-3">
-        <h1 class="text-xl font-serif font-bold tracking-tight text-[#241D18]">
+        <h1 class="text-lg sm:text-xl font-serif font-bold tracking-tight text-[#241D18]">
           Photos
         </h1>
         <span id="photo-counter" class="text-xs font-mono text-[#8C7D6F]">
@@ -185,9 +228,9 @@
     </div>
 
     <!-- Local Offline Plates Banner / Sync Trigger -->
-    <div id="local-sync-banner" class="hidden mb-6 p-4 rounded-xl bg-[#FAF6EE] border border-[#C79A59] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm font-mono text-xs animate-in fade-in">
+    <div id="local-sync-banner" class="hidden mb-6 p-3.5 sm:p-4 rounded-xl bg-[#FAF6EE] border border-[#C79A59] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm font-mono text-xs animate-in fade-in">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-[#B28242] text-white flex items-center justify-center font-bold text-sm shadow-inner">
+        <div class="w-8 h-8 rounded-lg bg-[#B28242] text-white flex items-center justify-center font-bold text-sm shadow-inner flex-shrink-0">
           ☁️
         </div>
         <div>
@@ -195,15 +238,15 @@
           <p class="text-[11px] text-[#7A6B5F]">Migrate these plates to physical datacentre bare-metal storage on PC 3.</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="local-sync-btn" onclick="syncLocalPlatesToDatacentre()" class="px-3.5 py-1.5 bg-[#2E4522] hover:bg-[#203118] text-[#E0EED4] rounded-lg font-bold border border-[#4E6F3B] transition flex items-center gap-1.5 shadow">
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button id="local-sync-btn" onclick="syncLocalPlatesToDatacentre()" class="w-full sm:w-auto px-3.5 py-1.5 bg-[#2E4522] hover:bg-[#203118] text-[#E0EED4] rounded-lg font-bold border border-[#4E6F3B] transition flex items-center justify-center gap-1.5 shadow">
           <span>Sync to Datacentre</span>
         </button>
       </div>
     </div>
 
     <!-- Gallery Grid (Vintage Print Frames) -->
-    <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+    <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
       <!-- Dynamically filled by JS -->
     </div>
   </main>
@@ -211,9 +254,9 @@
 
 
   <!-- ================= TAB: SETTINGS ================= -->
-  <main id="tab-settings" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 space-y-8">
-    <div class="border-b border-[#E1D7C6] pb-6">
-      <h1 class="text-2xl font-serif font-bold tracking-tight text-[#241D18]">
+  <main id="tab-settings" class="hidden flex-1 max-w-4xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
+    <div class="border-b border-[#E1D7C6] pb-4 sm:pb-6">
+      <h1 class="text-xl sm:text-2xl font-serif font-bold tracking-tight text-[#241D18]">
         Settings
       </h1>
       <p class="text-xs text-[#6F6054] font-serif italic mt-1">
@@ -222,58 +265,58 @@
     </div>
 
     <!-- Telemetry Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      <div class="paper-texture p-5 rounded-2xl">
-        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Storage Used</span>
-        <p id="settings-storage-used" class="text-3xl font-serif font-bold text-[#241D18]">0.0 MB</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+      <div class="paper-texture p-4 sm:p-5 rounded-2xl">
+        <span class="text-[10px] sm:text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Storage Used</span>
+        <p id="settings-storage-used" class="text-2xl sm:text-3xl font-serif font-bold text-[#241D18]">0.0 MB</p>
         <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Physical Datacentre Disk</p>
       </div>
-      <div class="paper-texture p-5 rounded-2xl">
-        <span class="text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Total Photos</span>
-        <p id="settings-plates-count" class="text-3xl font-serif font-bold text-[#241D18]">0 Photos</p>
+      <div class="paper-texture p-4 sm:p-5 rounded-2xl">
+        <span class="text-[10px] sm:text-[11px] font-mono uppercase text-[#7D6E62] block mb-1">Total Photos</span>
+        <p id="settings-plates-count" class="text-2xl sm:text-3xl font-serif font-bold text-[#241D18]">0 Photos</p>
         <p class="text-[10px] font-mono text-[#8C7B6D] mt-1">Stored in private vault</p>
       </div>
     </div>
 
     <!-- Database Details Form -->
-    <div class="vintage-card p-8 rounded-2xl">
+    <div class="vintage-card p-4 sm:p-8 rounded-2xl">
       <div class="flex items-center justify-between mb-1">
-        <h3 class="font-serif text-xl font-bold text-[#2A221C]">Database Details</h3>
-        <span id="passport-auth-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]">NOT SIGNED IN</span>
+        <h3 class="font-serif text-lg sm:text-xl font-bold text-[#2A221C]">Database Details</h3>
+        <span id="passport-auth-status" class="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded bg-[#4A3D34] text-[#D5C8B4] border border-[#69584B]">NOT SIGNED IN</span>
       </div>
-      <p class="text-xs text-[#6F6054] font-serif italic mb-6">User profile and PostgreSQL connection details.</p>
+      <p class="text-xs text-[#6F6054] font-serif italic mb-5 sm:mb-6">User profile and PostgreSQL connection details.</p>
       
       <div class="space-y-4 text-xs font-mono max-w-lg">
-        <div id="passport-login-prompt" class="p-4 rounded-xl bg-[#FAF6EE] border border-[#D5C8B4] flex items-center justify-between">
+        <div id="passport-login-prompt" class="p-3.5 sm:p-4 rounded-xl bg-[#FAF6EE] border border-[#D5C8B4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <p class="font-semibold text-[#2A221C]">Not Authenticated</p>
             <p class="text-[11px] text-[#7A6B5F]">Sign in or create an account to access your private vault repository.</p>
           </div>
-          <button onclick="openAuthModal('login')" class="px-3.5 py-1.5 bg-[#B28242] hover:bg-[#94662B] text-white text-xs font-mono uppercase tracking-wider rounded-lg transition shadow">
+          <button onclick="openAuthModal('login')" class="w-full sm:w-auto px-3.5 py-1.5 bg-[#B28242] hover:bg-[#94662B] text-white text-xs font-mono uppercase tracking-wider rounded-lg transition shadow text-center">
             Sign In / Register
           </button>
         </div>
 
         <div>
           <label class="block text-[#6F6054] mb-1">USER ID</label>
-          <input id="passport-id-input" type="text" disabled value="not-authenticated" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] select-all cursor-not-allowed">
+          <input id="passport-id-input" type="text" disabled value="not-authenticated" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-[#3A2F28] select-all cursor-not-allowed">
         </div>
         <div>
           <label class="block text-[#6F6054] mb-1">EMAIL</label>
-          <input id="passport-email-input" type="text" disabled value="none" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2.5 text-[#3A2F28] cursor-not-allowed">
+          <input id="passport-email-input" type="text" disabled value="none" class="w-full bg-[#F4EDE1] border border-[#D5C8B4] rounded-lg px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-[#3A2F28] cursor-not-allowed">
         </div>
         <div>
           <label class="block text-[#6F6054] mb-1">NAME</label>
-          <input id="passport-name-input" type="text" placeholder="Your Name" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2.5 text-[#241D18] focus:border-[#B28242] focus:outline-none">
+          <input id="passport-name-input" type="text" placeholder="Your Name" class="w-full bg-[#FFFFFF] border border-[#D0C2AE] rounded-lg px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-[#241D18] focus:border-[#B28242] focus:outline-none">
         </div>
-        <div class="flex items-center justify-between pt-2">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div class="flex items-center gap-3">
-            <button onclick="updatePassport()" class="px-5 py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
+            <button onclick="updatePassport()" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#2A221C] text-[#EFE7D8] font-mono uppercase tracking-wider text-xs rounded-xl hover:bg-[#1A1410] transition">
               Save Name
             </button>
             <span id="passport-status-msg" class="text-xs font-mono text-[#2E4522] hidden">✓ Saved</span>
           </div>
-          <button id="passport-signout-btn" onclick="logoutUser()" class="hidden px-4 py-2 border border-rose-300 text-rose-800 hover:bg-rose-50 rounded-xl transition text-xs font-mono uppercase tracking-wider">
+          <button id="passport-signout-btn" onclick="logoutUser()" class="hidden px-3.5 sm:px-4 py-2 border border-rose-300 text-rose-800 hover:bg-rose-50 rounded-xl transition text-xs font-mono uppercase tracking-wider">
             Sign Out
           </button>
         </div>
@@ -282,53 +325,53 @@
   </main>
 
   <!-- ================= VINTAGE SLIDE LIGHTBOX MODAL ================= -->
-  <div id="viewer-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-[#17120F]/95 backdrop-blur-xl select-none animate-in fade-in">
+  <div id="viewer-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-[#17120F]/95 backdrop-blur-xl select-none animate-in fade-in overflow-hidden touch-manipulation">
     
     <!-- Top Loupe Controls Bar -->
-    <div class="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#17120F] to-transparent flex items-center justify-between px-6 z-20 border-b border-[#3A2E26]">
-      <div class="flex items-center gap-4">
-        <button onclick="closeViewer()" class="p-2 text-[#D5C3A5] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Close (Esc)">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    <div class="absolute top-0 inset-x-0 h-14 sm:h-16 bg-gradient-to-b from-[#17120F] to-transparent sm:bg-[#17120F]/90 flex items-center justify-between px-3 sm:px-6 z-20 border-b border-[#3A2E26]">
+      <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+        <button onclick="closeViewer()" class="p-1.5 sm:p-2 text-[#D5C3A5] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition flex-shrink-0" title="Close (Esc)">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
-        <div>
-          <h4 id="viewer-title" class="text-sm font-serif font-bold text-[#F4ECE0] truncate max-w-xs sm:max-w-md">Plate</h4>
-          <p id="viewer-counter" class="text-[11px] font-mono text-[#A89889]">PLATE NO. 1 OF 6</p>
+        <div class="min-w-0">
+          <h4 id="viewer-title" class="text-xs sm:text-sm font-serif font-bold text-[#F4ECE0] truncate max-w-[120px] xs:max-w-[180px] sm:max-w-md">Plate</h4>
+          <p id="viewer-counter" class="text-[10px] sm:text-[11px] font-mono text-[#A89889]">PLATE NO. 1 OF 6</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="toggleZoom()" class="p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Loupe Magnifier">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+      <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        <button onclick="toggleZoom()" class="p-1.5 sm:p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-lg sm:rounded-xl border border-[#524136] transition" title="Loupe Magnifier">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
         </button>
-        <button onclick="toggleInfoDrawer()" class="p-2 text-[#C79A59] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Archival Ledger (I)">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <button onclick="toggleInfoDrawer()" class="p-1.5 sm:p-2 text-[#C79A59] hover:text-white bg-[#2A221C] hover:bg-[#382D25] rounded-lg sm:rounded-xl border border-[#524136] transition" title="Archival Ledger (I)">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </button>
-        <button onclick="downloadActiveImage()" class="p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-xl border border-[#524136] transition" title="Download Master File">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <button onclick="downloadActiveImage()" class="p-1.5 sm:p-2 text-[#D5C3A5] hover:text-[#C79A59] bg-[#2A221C] hover:bg-[#382D25] rounded-lg sm:rounded-xl border border-[#524136] transition" title="Download Master File">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         </button>
-        <button onclick="deleteActiveImage()" class="p-2 text-[#D5C3A5] hover:text-rose-400 bg-[#2A221C] hover:bg-rose-950/40 rounded-xl border border-[#524136] transition" title="Delete Plate">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        <button onclick="deleteActiveImage()" class="p-1.5 sm:p-2 text-[#D5C3A5] hover:text-rose-400 bg-[#2A221C] hover:bg-rose-950/40 rounded-lg sm:rounded-xl border border-[#524136] transition" title="Delete Plate">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </button>
       </div>
     </div>
 
     <!-- Center Archival Mount -->
-    <div class="relative w-full h-full flex items-center justify-center p-6 sm:p-12 overflow-hidden">
-      <div class="bg-white p-3 sm:p-4 rounded-xl shadow-2xl border border-[#3A2E26] max-h-[85vh] max-w-[90vw] flex flex-col items-center">
-        <img id="viewer-img" src="" alt="" class="max-h-[75vh] object-contain rounded transition-transform duration-300 cursor-zoom-in" onclick="toggleZoom()">
+    <div class="relative w-full h-full flex items-center justify-center p-2 sm:p-8 md:p-12 overflow-hidden">
+      <div class="bg-white p-2 sm:p-4 rounded-xl shadow-2xl border border-[#3A2E26] max-h-[82vh] max-w-[96vw] sm:max-w-[90vw] flex flex-col items-center">
+        <img id="viewer-img" src="" alt="" class="max-h-[70vh] sm:max-h-[75vh] object-contain rounded transition-transform duration-300 cursor-zoom-in" onclick="toggleZoom()">
       </div>
 
-      <button onclick="navigateViewer(-1)" class="absolute left-6 top-1/2 -translate-y-1/2 p-3 text-[#EFE7D8] bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <button onclick="navigateViewer(-1)" class="absolute left-1.5 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-[#EFE7D8] bg-[#2A221C]/85 sm:bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl z-10" aria-label="Previous Photo">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button onclick="navigateViewer(1)" class="absolute right-6 top-1/2 -translate-y-1/2 p-3 text-[#EFE7D8] bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <button onclick="navigateViewer(1)" class="absolute right-1.5 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-[#EFE7D8] bg-[#2A221C]/85 sm:bg-[#2A221C]/80 hover:bg-[#2A221C] rounded-full border border-[#6E5848] transition shadow-2xl z-10" aria-label="Next Photo">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
 
     <!-- Slide-out Archival Ledger Drawer -->
-    <div id="info-drawer" class="absolute right-0 top-16 bottom-0 w-80 sm:w-96 bg-[#211A16] border-l border-[#42342A] text-[#EFE7D8] p-6 overflow-y-auto z-30 transition-transform translate-x-full duration-300">
-      <div class="flex items-center justify-between pb-4 border-b border-[#42342A]">
+    <div id="info-drawer" class="absolute right-0 top-14 sm:top-16 bottom-0 w-full max-w-xs sm:w-96 bg-[#211A16] border-l border-[#42342A] text-[#EFE7D8] p-5 sm:p-6 overflow-y-auto z-30 transition-transform translate-x-full duration-300">
+      <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#42342A]">
         <h3 class="font-serif font-bold text-[#F4ECE0] flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#C79A59]"></span>
           Archival Dossier
@@ -336,13 +379,11 @@
         <button onclick="toggleInfoDrawer()" class="text-[#A89889] hover:text-white text-xs font-mono">✕ CLOSE</button>
       </div>
 
-      <div class="mt-6 space-y-4 text-xs font-mono">
+      <div class="mt-5 sm:mt-6 space-y-4 text-xs font-mono">
         <div>
           <span class="text-[#8F8174] block text-[10px] uppercase tracking-wider mb-1">Catalog Filename</span>
           <p id="meta-filename" class="font-semibold text-[#F4ECE0] break-all"></p>
         </div>
-
-
 
         <div class="grid grid-cols-2 gap-3 pt-2">
           <div class="p-3 rounded-xl bg-[#2A221C] border border-[#4A3D34]">
@@ -377,62 +418,60 @@
     </div>
   </div>
 
-
-
   <!-- ================= AUTHENTICATION MODAL (SIGN IN / REGISTER) ================= -->
-  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
-    <div class="w-full max-w-md bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in overflow-y-auto">
+    <div class="w-full max-w-md bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]">
       
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
+      <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
             <svg class="w-4 h-4 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
           </div>
           <div>
-            <h3 id="auth-modal-title" class="font-serif text-lg font-bold text-[#2A221C]">Archivist Sign In</h3>
-            <p id="auth-modal-subtitle" class="text-xs text-[#7A6B5F] font-serif italic">Access your private multi-tenant repository on PC 4.</p>
+            <h3 id="auth-modal-title" class="font-serif text-base sm:text-lg font-bold text-[#2A221C]">Archivist Sign In</h3>
+            <p id="auth-modal-subtitle" class="text-[11px] sm:text-xs text-[#7A6B5F] font-serif italic">Access your private multi-tenant repository on PC 4.</p>
           </div>
         </div>
-        <button onclick="closeAuthModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
+        <button onclick="closeAuthModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm p-1">✕</button>
       </div>
 
       <!-- Auth Tab Toggle (Sign In vs Register) -->
-      <div class="px-6 pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
-        <button id="auth-tab-login" onclick="switchAuthTab('login')" class="px-4 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
+      <div class="px-4 sm:px-6 pt-2 sm:pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
+        <button id="auth-tab-login" onclick="switchAuthTab('login')" class="px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
           Sign In
         </button>
-        <button id="auth-tab-register" onclick="switchAuthTab('register')" class="px-4 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
+        <button id="auth-tab-register" onclick="switchAuthTab('register')" class="px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
           Create Account
         </button>
       </div>
 
       <!-- Form Body -->
-      <div class="p-6 space-y-4">
+      <div class="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto">
         
         <!-- Error / Status Notice -->
         <div id="auth-status-alert" class="hidden p-3 rounded-xl border text-xs font-mono"></div>
 
         <!-- Login Form -->
-        <form id="auth-login-form" onsubmit="handleLoginFormSubmit(event)" class="space-y-4">
+        <form id="auth-login-form" onsubmit="handleLoginFormSubmit(event)" class="space-y-3.5 sm:space-y-4">
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Email Address</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Email Address</label>
             <input
               id="login-email-input"
               type="email"
               required
               placeholder="archivist@vault.local"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Master Passphrase</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Master Passphrase</label>
             <input
               id="login-password-input"
               type="password"
               required
               placeholder="••••••••••••"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
 
@@ -448,47 +487,47 @@
         </form>
 
         <!-- Registration Form -->
-        <form id="auth-register-form" onsubmit="handleRegisterFormSubmit(event)" class="hidden space-y-4">
+        <form id="auth-register-form" onsubmit="handleRegisterFormSubmit(event)" class="hidden space-y-3.5 sm:space-y-4">
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Archivist Full Name</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Archivist Full Name</label>
             <input
               id="register-name-input"
               type="text"
               required
               placeholder="e.g. Swayam Ruparel"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Email Address</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Email Address</label>
             <input
               id="register-email-input"
               type="email"
               required
               placeholder="you@example.com"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Master Passphrase (min 8 characters)</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Master Passphrase (min 8 chars)</label>
             <input
               id="register-password-input"
               type="password"
               required
               minlength="8"
               placeholder="••••••••••••"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
           <div>
-            <label class="block text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1.5">Confirm Passphrase</label>
+            <label class="block text-[11px] sm:text-xs font-mono text-[#6A5A4D] uppercase tracking-wider mb-1">Confirm Passphrase</label>
             <input
               id="register-confirm-password-input"
               type="password"
               required
               minlength="8"
               placeholder="••••••••••••"
-              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
+              class="w-full bg-[#FAF6EE] border border-[#D5C8B4] rounded-xl px-3.5 py-2 text-sm sm:text-xs font-mono text-[#2A221C] focus:outline-none focus:border-[#94662B] focus:bg-white transition"
             />
           </div>
 
@@ -506,7 +545,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-3 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between text-[11px] font-mono text-[#8C7B6D]">
+      <div class="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8C7B6D]">
         <span>NODE: PC 4 (POSTGRESQL 16)</span>
         <span>BCRYPT + JWT HS256</span>
       </div>
@@ -514,44 +553,44 @@
   </div>
 
   <!-- ================= DARKROOM NEGATIVE INGESTION MODAL ================= -->
-  <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in">
-    <div class="w-full max-w-2xl bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in overflow-y-auto">
+    <div class="w-full max-w-2xl bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
       
-      <div class="px-6 py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
+      <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
             +
           </div>
           <div>
-            <h3 class="font-serif text-lg font-bold text-[#2A221C]">Plate Ingestion & Darkroom Processing</h3>
-            <p class="text-xs text-[#7A6B5F] font-serif italic">Upload negatives from your photo gallery or expose live using camera.</p>
+            <h3 class="font-serif text-base sm:text-lg font-bold text-[#2A221C]">Plate Ingestion & Processing</h3>
+            <p class="text-[11px] sm:text-xs text-[#7A6B5F] font-serif italic">Upload negatives from device or camera.</p>
           </div>
         </div>
-        <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm">✕</button>
+        <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm p-1">✕</button>
       </div>
 
       <!-- Mode Selector: Gallery vs Camera -->
-      <div class="px-6 pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
-        <button id="upload-tab-gallery" onclick="switchUploadTab('gallery')" class="px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
+      <div class="px-4 sm:px-6 pt-2 sm:pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
+        <button id="upload-tab-gallery" onclick="switchUploadTab('gallery')" class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
           From Gallery / Files
         </button>
-        <button id="upload-tab-camera" onclick="switchUploadTab('camera')" class="px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
+        <button id="upload-tab-camera" onclick="switchUploadTab('camera')" class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
           Take Photo (Camera)
         </button>
       </div>
 
-      <div class="p-6 space-y-5 overflow-y-auto">
+      <div class="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
         <!-- Gallery Mode -->
         <div id="upload-mode-gallery" class="space-y-4">
-          <div onclick="document.getElementById('gallery-file-input').click()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition">
-            <div class="w-12 h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-3 text-[#94662B]">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <div onclick="document.getElementById('gallery-file-input').click()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-5 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-[0.99]">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-2.5 sm:mb-3 text-[#94662B]">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <p class="font-serif text-base font-semibold text-[#2A221C]">
+            <p class="font-serif text-sm sm:text-base font-semibold text-[#2A221C]">
               Select photographs from your Gallery
             </p>
-            <p class="text-xs font-mono text-[#8C7B6D] mt-1">
-              Browse photo library or drag & drop files • JPEG, PNG, WebP
+            <p class="text-[11px] sm:text-xs font-mono text-[#8C7B6D] mt-1">
+              Browse photo library or drag & drop • JPEG, PNG, WebP
             </p>
             <input id="gallery-file-input" type="file" multiple accept="image/*" class="hidden" onchange="handleGalleryFileInput(this.files)" />
           </div>
@@ -559,31 +598,31 @@
 
         <!-- Camera Mode -->
         <div id="upload-mode-camera" class="hidden space-y-4">
-          <div class="relative rounded-2xl overflow-hidden bg-[#17120F] aspect-video border border-[#3A2E26] flex items-center justify-center">
+          <div class="relative rounded-2xl overflow-hidden bg-[#17120F] aspect-[4/3] sm:aspect-video border border-[#3A2E26] flex items-center justify-center">
             <video id="camera-video-preview" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
 
-            <div id="camera-placeholder" class="text-center p-6 space-y-3">
-              <div class="w-12 h-12 rounded-xl bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div id="camera-placeholder" class="text-center p-4 sm:p-6 space-y-3">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               </div>
-              <p class="text-xs font-mono text-[#A89889]">Optical camera shutter currently disengaged</p>
-              <div class="flex items-center justify-center gap-2 pt-2">
-                <button onclick="startLiveCamera()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1D1713] text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#7A5B36] transition">
+              <p class="text-[11px] sm:text-xs font-mono text-[#A89889]">Optical camera shutter disengaged</p>
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-1 sm:pt-2">
+                <button onclick="startLiveCamera()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2A221C] hover:bg-[#1D1713] text-[11px] sm:text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#7A5B36] transition">
                   Start Live Camera
                 </button>
-                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-4 py-2 bg-[#B28242] hover:bg-[#94662B] text-xs font-mono text-white rounded-xl transition">
+                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#B28242] hover:bg-[#94662B] text-[11px] sm:text-xs font-mono text-white rounded-xl transition">
                   Open Device Camera
                 </button>
               </div>
             </div>
 
             <!-- Live Shutter Overlay -->
-            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-4 flex items-center justify-center gap-4 px-4 z-10">
-              <button onclick="captureCameraPlate()" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FAF6EE] text-[#2A221C] font-mono uppercase tracking-wider text-xs font-bold shadow-2xl hover:bg-white transition active:scale-95 border border-[#8C6D46]">
-                <span class="w-3 h-3 rounded-full bg-rose-600 animate-pulse"></span>
+            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-4 flex items-center justify-center gap-3 sm:gap-4 px-4 z-10">
+              <button onclick="captureCameraPlate()" class="flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#FAF6EE] text-[#2A221C] font-mono uppercase tracking-wider text-[11px] sm:text-xs font-bold shadow-2xl hover:bg-white transition active:scale-95 border border-[#8C6D46]">
+                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-600 animate-pulse"></span>
                 <span>Expose Plate</span>
               </button>
-              <button onclick="stopLiveCamera()" class="p-2.5 rounded-full bg-[#17120F]/80 text-[#D5C3A5] hover:text-white border border-[#42342A] transition" title="Stop Camera">
+              <button onclick="stopLiveCamera()" class="p-2 sm:p-2.5 rounded-full bg-[#17120F]/80 text-[#D5C3A5] hover:text-white border border-[#42342A] transition" title="Stop Camera">
                 ✕
               </button>
             </div>
@@ -598,9 +637,9 @@
         </div>
       </div>
 
-      <div class="px-6 py-4 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
-        <span class="text-xs font-mono text-[#8C7B6D]">STORAGE QUOTA: 80% REMAINING</span>
-        <button onclick="closeUploadModal()" class="px-5 py-2 text-xs font-mono uppercase tracking-wider bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] rounded-xl transition">
+      <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+        <span class="text-[10px] sm:text-xs font-mono text-[#8C7B6D]">STORAGE QUOTA: 80% REMAINING</span>
+        <button onclick="closeUploadModal()" class="px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] rounded-xl transition">
           Done
         </button>
       </div>
@@ -610,6 +649,7 @@
   <!-- ================= DATA & JAVASCRIPT ================= -->
   <script>
     let serverPlates = [];
+    let userPlates = [];
     let currentImages = [];
     let activeIndex = 0;
     let isZoomed = false;
@@ -730,17 +770,17 @@
       if (imagesToRender.length === 0) {
         const isAuth = !!getAuthToken();
         grid.innerHTML = `
-          <div class="col-span-full py-20 flex flex-col items-center justify-center text-center">
-            <div class="w-16 h-16 rounded-2xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center text-[#94662B] mb-4 shadow-inner">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <div class="col-span-full py-12 sm:py-20 px-3 flex flex-col items-center justify-center text-center">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center text-[#94662B] mb-3.5 sm:mb-4 shadow-inner">
+              <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <h3 class="font-serif text-2xl font-bold text-[#2A221C] mb-2">Upload your first image</h3>
-            <p class="text-sm font-serif text-[#7A6A5E] max-w-sm mb-6">
+            <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#2A221C] mb-2">Upload your first image</h3>
+            <p class="text-xs sm:text-sm font-serif text-[#7A6A5E] max-w-sm mb-5 sm:mb-6">
               ${isAuth ? "Your private datacentre vault is empty. Ingest photographs to archive them on physical cluster storage." : "Sign in to your private vault to start archiving photographs."}
             </p>
             <button
               onclick="${isAuth ? 'openUploadModal()' : 'openAuthModal(\"login\")'}"
-              class="flex items-center gap-2 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-5 py-2.5 rounded-xl border border-[#7A5B36] transition shadow-md active:scale-95"
+              class="flex items-center gap-2 bg-[#2A221C] hover:bg-[#1D1713] text-[#F8F5EE] text-xs font-mono uppercase tracking-wider px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border border-[#7A5B36] transition shadow-md active:scale-95"
             >
               <svg class="w-4 h-4 text-[#D5C3A5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               <span>${isAuth ? "Upload First Image" : "Sign In to Upload"}</span>
@@ -754,7 +794,7 @@
 
       imagesToRender.forEach((img, idx) => {
         const frame = document.createElement("div");
-        frame.className = "print-frame rounded-lg cursor-pointer select-none group relative";
+        frame.className = "print-frame rounded-lg cursor-pointer select-none group relative active:scale-[0.99] transition duration-200";
         frame.onclick = () => openViewer(idx);
 
         const customBadge = img.isServer
@@ -769,9 +809,9 @@
               ${(img.format || "JPEG").split(" ")[0]}
             </div>
           </div>
-          <div class="mt-3 px-1 flex flex-col">
+          <div class="mt-2.5 sm:mt-3 px-1 flex flex-col">
             <h4 class="font-serif font-bold text-sm text-[#2A221C] group-hover:text-[#94662B] transition truncate">${img.title}</h4>
-            <div class="mt-2.5 pt-2 border-t border-[#EFE7D8] flex items-center justify-between text-[10px] font-mono text-[#8C7B6D]">
+            <div class="mt-2 pt-2 border-t border-[#EFE7D8] flex items-center justify-between text-[10px] font-mono text-[#8C7B6D]">
               <span>${img.dims}</span>
               <span>${img.size}</span>
             </div>
@@ -795,15 +835,31 @@
       }
     }
 
+    function toggleMobileSearch() {
+      const bar = document.getElementById("mobile-search-bar");
+      if (!bar) return;
+      bar.classList.toggle("hidden");
+      if (!bar.classList.contains("hidden")) {
+        const inp = document.getElementById("mobile-search-input");
+        if (inp) inp.focus();
+      }
+    }
+
     function handleSearch(val) {
-      const q = val.toLowerCase().trim();
+      const q = (val || "").toLowerCase().trim();
+      const deskInp = document.getElementById("search-input");
+      const mobInp = document.getElementById("mobile-search-input");
+      if (deskInp && deskInp.value !== val) deskInp.value = val;
+      if (mobInp && mobInp.value !== val) mobInp.value = val;
+
+      const all = [...serverPlates, ...userPlates];
       if (!q) {
-        currentImages = [...serverPlates];
+        currentImages = all;
         renderGallery(currentImages);
         return;
       }
-      currentImages = serverPlates.filter(i => 
-        i.title.toLowerCase().includes(q) || 
+      currentImages = all.filter(i => 
+        (i.title && i.title.toLowerCase().includes(q)) || 
         (i.format && i.format.toLowerCase().includes(q))
       );
       renderGallery(currentImages);
@@ -813,8 +869,8 @@
       document.getElementById("tab-gallery").classList.add("hidden");
       document.getElementById("tab-settings").classList.add("hidden");
 
-      const inactive = "px-3 py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]";
-      const active = "px-3 py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm";
+      const inactive = "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition text-[#695B50] hover:text-[#2A221C] hover:bg-[#EFE8DC]";
+      const active = "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition bg-[#2A221C] text-[#F8F5EE] font-medium shadow-sm";
 
       document.getElementById("tab-gallery-btn").className = inactive;
       document.getElementById("tab-settings-btn").className = inactive;
@@ -1667,6 +1723,36 @@
       if (e.key === "ArrowLeft") navigateViewer(-1);
       if (e.key === "ArrowRight") navigateViewer(1);
     });
+
+    // Mobile Touch Gesture Support: Swipe Left / Right to navigate photos
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const viewerModal = document.getElementById("viewer-modal");
+    if (viewerModal) {
+      viewerModal.addEventListener("touchstart", (e) => {
+        if (e.touches && e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      viewerModal.addEventListener("touchend", (e) => {
+        if (isZoomed || infoOpen) return;
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        // Horizontal swipe: threshold 40px and predominantly horizontal
+        if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+          if (diffX < 0) {
+            navigateViewer(1);  // Swipe left -> Next photo
+          } else {
+            navigateViewer(-1); // Swipe right -> Previous photo
+          }
+        }
+      }, { passive: true });
+    }
 
     // Initial load: Datacentre Server & Persisted Local Storage
     async function initVault() {

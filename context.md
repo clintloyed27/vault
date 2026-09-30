@@ -621,8 +621,36 @@ The entire automated pipeline executed with **SUCCESS**:
 6. **Test Suite:**
    - Added unit tests in `tests/test_isolation_security.py` validating slashless `/api/v1/images` and `?token=` query authentication.
    - All 17 backend tests passing (`pytest tests -v`).
+---
 
+## 25. Frontend Mobile Phone Responsiveness Overhaul (September 30, 2026 Night)
 
+### Problem Identified:
+On mobile phone viewports (360px–430px wide, e.g. iPhone & Android devices), controls in the top masthead (Upload button, Sign In / Avatar capsule) overflowed past the right viewport boundary, forcing users to horizontally scroll to reach them. Additionally, modals and the Lightbox viewer suffered from oversized paddings, wide drawer widths, and navigation arrow overlaps on small screens.
 
-
+### Optimizations Implemented:
+1. **Zero-Horizontal-Scroll Hardening:**
+   - Added `overflow-x: hidden; max-width: 100%;` and `box-sizing: border-box;` to `html, body`.
+   - Set `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">`.
+   - Added `-webkit-tap-highlight-color: transparent;` and `touch-action: manipulation;` for high-end mobile feel.
+2. **Responsive Top Masthead:**
+   - Scaled brand and tab navigation gap down from fixed `gap-8` to `gap-2 sm:gap-5 md:gap-8`.
+   - Made Upload button show a compact, touch-friendly icon button on small screens (`<span class="hidden sm:inline">Upload</span>`).
+   - Made Sign In button compact on mobile (`<span class="hidden sm:inline">Sign In</span>`).
+   - Added collapsible Mobile Search Toggle (`#mobile-search-toggle` + `#mobile-search-bar`) so search is accessible without taking up horizontal header space.
+3. **Lightbox Viewer & Touch Gestures:**
+   - Top bar controls padding adjusted to `px-3 sm:px-6` with scaled buttons (`p-1.5 sm:p-2`).
+   - Image container max dimensions calibrated to `max-w-[96vw] max-h-[82vh]` with inner image `max-h-[70vh] sm:max-h-[75vh]`.
+   - Navigation arrows repositioned closer to edge (`left-1.5 sm:left-6`, `right-1.5 sm:right-6`) so they don't obscure photographs on portrait screens.
+   - Archival Ledger Drawer (`#info-drawer`) converted to `w-full max-w-xs sm:w-96` so it never overflows narrow viewports.
+   - **Mobile Touch Gesture Support:** Added swipe-left (next photo) and swipe-right (previous photo) touch listeners (`touchstart`/`touchend` with horizontal trajectory thresholds).
+4. **Adaptive Modals (Upload, Camera & Auth):**
+   - Modals set to `max-h-[92vh] sm:max-h-[90vh]` with `overflow-y-auto` and mobile-friendly `p-3 sm:p-4` gutters.
+   - Camera preview given `aspect-[4/3] sm:aspect-video` for ideal mobile camera ratios.
+   - Auth input fields sized with `text-sm sm:text-xs` to eliminate iOS Safari's auto-zoom jump on focus.
+5. **Gallery Cards & Grid:**
+   - Grid configured as `grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6`.
+   - Print frame padding updated to `padding: 8px 8px 24px 8px` on mobile, expanding to `10px 10px 32px 10px` on desktop.
+   - Added `active:scale-[0.99]` feedback on touch.
+   - Synced changes to `preview.html`.
 
