@@ -29,18 +29,21 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
 def login(
     payload: LoginRequest,
     response: Response,
+    request: Request,
     db: Session = Depends(get_db),
 ):
     """Authenticate with email and password, issuing access token and secure refresh cookie."""
     user = auth_service.authenticate_user(db=db, email=payload.email, password=payload.password)
     access_token, raw_refresh, expires_in = auth_service.issue_tokens(db=db, user=user)
 
+    is_secure = request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
+
     # Set secure HTTPOnly refresh cookie
     response.set_cookie(
         key="vault_refresh_token",
         value=raw_refresh,
         httponly=True,
-        secure=settings.ENVIRONMENT == "production",
+        secure=is_secure,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/api/v1/auth",
@@ -50,7 +53,7 @@ def login(
         key="vault_access_token",
         value=access_token,
         httponly=False,
-        secure=settings.ENVIRONMENT == "production",
+        secure=is_secure,
         samesite="lax",
         max_age=expires_in,
         path="/",
@@ -71,6 +74,7 @@ def login(
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(
     response: Response,
+    request: Request,
     payload: RefreshTokenRequest = None,
     vault_refresh_token: str | None = Cookie(None),
     db: Session = Depends(get_db),
@@ -84,12 +88,14 @@ def refresh(
         db=db, raw_refresh_token=raw_token
     )
 
+    is_secure = request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
+
     # Set rotated refresh cookie
     response.set_cookie(
         key="vault_refresh_token",
         value=new_refresh,
         httponly=True,
-        secure=settings.ENVIRONMENT == "production",
+        secure=is_secure,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/api/v1/auth",
@@ -99,11 +105,12 @@ def refresh(
         key="vault_access_token",
         value=new_access,
         httponly=False,
-        secure=settings.ENVIRONMENT == "production",
+        secure=is_secure,
         samesite="lax",
         max_age=expires_in,
         path="/",
     )
+
 
     return TokenResponse(
         access_token=new_access,

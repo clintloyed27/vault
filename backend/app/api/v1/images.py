@@ -37,6 +37,7 @@ async def upload_images(
     return uploaded_images
 
 
+@router.get("", response_model=ImageListResponse)
 @router.get("/", response_model=ImageListResponse)
 def list_images(
     page: int = Query(1, ge=1),

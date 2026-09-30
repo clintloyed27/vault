@@ -929,12 +929,14 @@
         }
         if (target.isCustom || target.id.startsWith("plate-")) {
           await dbDeletePlate(target.id);
+          userPlates = userPlates.filter(p => p.id !== target.id);
         }
         currentImages.splice(activeIndex, 1);
         closeViewer();
         renderGallery(currentImages);
       }
     }
+
 
     // ================= INGESTION (GALLERY & CAMERA) =================
     let cameraStream = null;
@@ -1283,10 +1285,15 @@
     async function authFetch(url, options = {}) {
       let token = getAuthToken();
       const headers = new Headers(options.headers || {});
+      let targetUrl = url;
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
+        if (!targetUrl.includes("token=")) {
+          const sep = targetUrl.includes("?") ? "&" : "?";
+          targetUrl = `${targetUrl}${sep}token=${encodeURIComponent(token)}`;
+        }
       }
-      let res = await fetch(url, { ...options, headers });
+      let res = await fetch(targetUrl, { ...options, headers });
       if (res.status === 401) {
         try {
           const refreshRes = await fetch("/api/v1/auth/refresh", {
@@ -1297,7 +1304,8 @@
             const data = await refreshRes.json();
             setAuthSession(data.access_token, data.user);
             headers.set("Authorization", `Bearer ${data.access_token}`);
-            res = await fetch(url, { ...options, headers });
+            targetUrl = targetUrl.replace(/([?&])token=[^&]*/, `$1token=${encodeURIComponent(data.access_token)}`);
+            res = await fetch(targetUrl, { ...options, headers });
           } else {
             clearAuthSession();
             headers.delete("Authorization");
@@ -1311,6 +1319,7 @@
       }
       return res;
     }
+
 
     async function syncLocalPlatesToDatacentre() {
       const btn = document.getElementById("local-sync-btn");
@@ -1659,7 +1668,7 @@
       if (e.key === "ArrowRight") navigateViewer(1);
     });
 
-    // Initial load: Datacentre Server
+    // Initial load: Datacentre Server & Persisted Local Storage
     async function initVault() {
       // 1. Sync Authentication UI state
       updateAuthUI();
@@ -1670,7 +1679,7 @@
       serverPlates = [];
       if (isAuth) {
         try {
-          const res = await authFetch("/api/v1/images");
+          const res = await authFetch("/api/v1/images/");
           if (res.ok) {
             const data = await res.json();
             if (data && data.items) {
@@ -1697,10 +1706,31 @@
         }
       }
 
-      currentImages = [...serverPlates];
+      // 3. Load user local plates and deduplicate against datacentre
+      userPlates = [];
+      try {
+        const rawLocal = await dbGetAllPlates();
+        const serverTitles = new Set(serverPlates.map(p => (p.title || "").toLowerCase().trim()));
+        const serverHashes = new Set(serverPlates.map(p => p.hash).filter(Boolean));
+
+        for (const plate of rawLocal) {
+          const titleKey = (plate.title || "").toLowerCase().trim();
+          if (serverTitles.has(titleKey) || (plate.hash && serverHashes.has(plate.hash))) {
+            await dbDeletePlate(plate.id);
+          } else {
+            userPlates.push(plate);
+          }
+        }
+        userPlates.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      } catch (err) {
+        console.warn("Could not load local persisted plates:", err);
+      }
+
+      currentImages = [...serverPlates, ...userPlates];
       renderGallery(currentImages);
       updateTelemetryCounters();
     }
+
 
     initVault();
   </script>

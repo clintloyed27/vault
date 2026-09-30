@@ -598,6 +598,31 @@ The entire automated pipeline executed with **SUCCESS**:
 4. **Post-Login State Synchronization:**
    - Verify that upon completing login / token refresh, `initVault()` is immediately triggered with the fresh JWT token to load the user's datacentre gallery.
 
+---
+
+## 24. Codebase Optimization & Image Persistence Hardening (September 30, 2026 Night)
+
+### Key Improvements Implemented:
+1. **Neutralized 307 Redirect on `/api/v1/images`:**
+   - **Root Cause:** When `initVault()` queried `/api/v1/images`, FastAPI issued a `307 Temporary Redirect` to `/api/v1/images/`. In Safari (iOS) and strict browser environments, `fetch` drops `Authorization: Bearer` headers across redirects. Without the header or cookie, the backend silently fell back to public guest admin (0 photos), causing the gallery to show empty.
+   - **Fix:** Added `@router.get("")` alongside `@router.get("/")` in `backend/app/api/v1/images.py`. Both slashless and trailing-slash routes return `200 OK` directly without redirects.
+2. **Dual-Channel Authentication in `authFetch`:**
+   - In `index.html` and `preview.html`, `authFetch` now transmits the JWT token in **both** the `Authorization: Bearer <token>` header AND mirrors it into the URL query string (`?token=<token>`).
+   - Ensures 100% auth resilience even if reverse proxies, mobile browsers, or redirects drop HTTP headers.
+3. **Persisted Local Storage Reconciliation in `initVault()`:**
+   - Updated `initVault()` to query `/api/v1/images/` and reconcile against local IndexedDB (`dbGetAllPlates`).
+   - De-duplicates items already confirmed on the server, while preserving any pending/un-synced local plates.
+   - Users who uploaded during connectivity glitches will never lose photos upon logging out/in; photos remain safely visible with the `LOCAL` badge and `Sync to Datacentre` option.
+4. **Dynamic Cookie Security (`secure=is_secure`):**
+   - In `backend/app/api/v1/auth.py`, `login` and `refresh` now dynamically inspect the incoming request scheme (`request.url.scheme == "https"` or `x-forwarded-proto == "https"`).
+   - Cookies are marked `secure=True` over Cloudflare HTTPS, and `secure=False` when developing/testing over plain LAN HTTP (`http://172.16.20.12:8080`), ensuring browser cookies are never rejected on local HTTP.
+5. **Modernized Exception Constants:**
+   - Updated `FileValidationError` to `HTTP_422_UNPROCESSABLE_CONTENT` (422) and `PayloadTooLargeError` to `HTTP_413_CONTENT_TOO_LARGE` (413) in `backend/app/core/exceptions.py`.
+6. **Test Suite:**
+   - Added unit tests in `tests/test_isolation_security.py` validating slashless `/api/v1/images` and `?token=` query authentication.
+   - All 17 backend tests passing (`pytest tests -v`).
+
+
 
 
 

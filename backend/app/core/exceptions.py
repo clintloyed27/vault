@@ -40,7 +40,7 @@ class NotFoundError(VaultException):
 class FileValidationError(VaultException):
     def __init__(self, detail: str = "Invalid file payload or unsupported format"):
         super().__init__(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             detail=detail
         )
 
@@ -48,9 +48,10 @@ class FileValidationError(VaultException):
 class PayloadTooLargeError(VaultException):
     def __init__(self, detail: str = "File size exceeds allowed maximum"):
         super().__init__(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=getattr(status, "HTTP_413_CONTENT_TOO_LARGE", 413),
             detail=detail
         )
+
 
 
 class ConflictError(VaultException):

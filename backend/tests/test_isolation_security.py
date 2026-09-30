@@ -121,8 +121,20 @@ def test_user_gallery_listing_isolation(
     assert list_a["total"] == 1
     assert list_a["items"][0]["original_filename"] == "alice.jpg"
 
+    # User A listing without trailing slash also succeeds without redirect
+    list_a_noslash = client.get("/api/v1/images", headers=auth_header_user_a)
+    assert list_a_noslash.status_code == 200
+    assert list_a_noslash.json()["total"] == 1
+
+    # User A listing with token in query parameter succeeds
+    token_a = auth_header_user_a["Authorization"].split(" ")[1]
+    list_a_query = client.get(f"/api/v1/images?token={token_a}")
+    assert list_a_query.status_code == 200
+    assert list_a_query.json()["total"] == 1
+
     # User B listing contains strictly 2 images
     list_b = client.get("/api/v1/images/", headers=auth_header_user_b).json()
     assert list_b["total"] == 2
     for item in list_b["items"]:
         assert "bob" in item["original_filename"]
+
