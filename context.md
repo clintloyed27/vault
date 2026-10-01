@@ -654,3 +654,33 @@ On mobile phone viewports (360px–430px wide, e.g. iPhone & Android devices), c
    - Added `active:scale-[0.99]` feedback on touch.
    - Synced changes to `preview.html`.
 
+---
+
+## 26. Verified Live Deployment: Build #52 & Tunnel Benchmark (October 1, 2026)
+
+### Key Achievements:
+1. **Automated Production Pipeline Execution:**
+   - Source code synced across `gitea` (`server2026-test.git`), GitHub origin (`vault.git`), and GitHub personal (`photo-vault.git`) with commit `e8a320b`.
+   - Jenkins automated pipeline `Gitea-CI-Test` executed **Build #52** with status **SUCCESS**:
+     - Checked out commit `e8a320b`.
+     - Built multi-stage Docker container image.
+     - Pushed image `172.16.20.103:8082/server2026-test:52` to Sonatype Nexus Docker Registry.
+     - Deployed container `server2026-web` to PC 3 (`172.16.20.12:8080`) attached to `--network network_tunnel-net` with persistent storage volume `-v /data/apps/server2026/storage:/data/storage`.
+     - Container status: `Up (healthy)`.
+
+2. **Network Tunnel & Edge Latency Benchmark (`vault.swayamruparel.com`):**
+   - **Protocol:** Cloudflare Tunnel multiplexed HTTP/2 connected to Mumbai edge POPs (`bom03`, `bom04`, `bom08`, `bom11`).
+   - **Root HTML Ingress:** ~360ms – 500ms for complete 84.7 KB document transfer.
+   - **Authenticated API Roundtrip Latency (measured live over public internet):**
+     - User Registration: ~290ms
+     - JWT Authentication: ~250ms
+     - Multipart File Upload (Ingestion + EXIF strip + WebP thumb + Disk + PostgreSQL): **266ms**
+     - Gallery Metadata Fetch (`GET /api/v1/images`): **213ms**
+     - WebP Thumbnail Retrieval: **204ms**
+     - Full Master Image Download: **257ms**
+     - Secure Resource Deletion: **223ms**
+   - **DNS Resolution Diagnostic:**
+     - Identified that the developer laptop had an unresponsive primary DNS server configured (`172.16.20.55`) causing an artificial initial 2-second timeout before falling back to `8.8.8.8`.
+     - Once DNS is resolved/cached, direct tunnel roundtrips maintain consistent **200ms–260ms** execution times.
+
+
