@@ -552,44 +552,45 @@
     </div>
   </div>
 
-  <!-- ================= DARKROOM NEGATIVE INGESTION MODAL ================= -->
-  <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-[#17120F]/80 backdrop-blur-md animate-in fade-in overflow-y-auto">
-    <div class="w-full max-w-2xl bg-[#FFFDF9] border border-[#D5C9B4] rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+  <!-- ================= UPLOAD & CAMERA INGESTION MODAL ================= -->
+  <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-0 sm:p-4 bg-[#17120F]/90 backdrop-blur-md animate-in fade-in overflow-hidden">
+    <div id="upload-modal-card" class="w-full max-w-2xl bg-[#FFFDF9] border-0 sm:border border-[#D5C9B4] rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[92vh] my-auto">
       
-      <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+      <!-- Modal Header -->
+      <div class="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2.5 sm:gap-3">
-          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold">
+          <div class="w-8 h-8 rounded-lg bg-[#2A221C] text-[#F4ECE0] flex items-center justify-center font-display font-bold text-sm">
             +
           </div>
           <div>
-            <h3 class="font-serif text-base sm:text-lg font-bold text-[#2A221C]">Plate Ingestion & Processing</h3>
-            <p class="text-[11px] sm:text-xs text-[#7A6B5F] font-serif italic">Upload negatives from device or camera.</p>
+            <h3 class="font-serif text-sm sm:text-base font-bold text-[#2A221C]">Upload Photographs</h3>
+            <p class="text-[10px] sm:text-xs text-[#7A6B5F] font-serif italic">Add from library or capture with camera.</p>
           </div>
         </div>
-        <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm p-1">✕</button>
+        <button onclick="closeUploadModal()" class="text-[#7A6B5F] hover:text-[#2A221C] font-mono text-sm p-1.5 rounded-lg active:bg-[#EFE7D8]">✕</button>
       </div>
 
       <!-- Mode Selector: Gallery vs Camera -->
-      <div class="px-4 sm:px-6 pt-2 sm:pt-3 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50">
+      <div class="px-4 sm:px-6 pt-2 sm:pt-2.5 flex items-center gap-2 border-b border-[#E7DECE] bg-[#FAF6EE]/50 shrink-0">
         <button id="upload-tab-gallery" onclick="switchUploadTab('gallery')" class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition">
-          From Gallery / Files
+          From Files / Library
         </button>
         <button id="upload-tab-camera" onclick="switchUploadTab('camera')" class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition">
           Take Photo (Camera)
         </button>
       </div>
 
-      <div class="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
+      <div class="p-3 sm:p-6 flex-1 flex flex-col overflow-y-auto">
         <!-- Gallery Mode -->
         <div id="upload-mode-gallery" class="space-y-4">
-          <div onclick="document.getElementById('gallery-file-input').click()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-5 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-[0.99]">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-2.5 sm:mb-3 text-[#94662B]">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <div onclick="document.getElementById('gallery-file-input').click()" class="border-2 border-dashed border-[#C79A59] hover:border-[#94662B] bg-[#FAF6EE] rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-[0.99]">
+            <div class="w-12 h-12 rounded-xl bg-[#EFE7D8] border border-[#D5C8B4] flex items-center justify-center mb-3 text-[#94662B]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <p class="font-serif text-sm sm:text-base font-semibold text-[#2A221C]">
+            <p class="font-serif text-base font-semibold text-[#2A221C]">
               Select photographs from your Gallery
             </p>
-            <p class="text-[11px] sm:text-xs font-mono text-[#8C7B6D] mt-1">
+            <p class="text-xs font-mono text-[#8C7B6D] mt-1">
               Browse photo library or drag & drop • JPEG, PNG, WebP
             </p>
             <input id="gallery-file-input" type="file" multiple accept="image/*" class="hidden" onchange="handleGalleryFileInput(this.files)" />
@@ -597,8 +598,8 @@
         </div>
 
         <!-- Camera Mode -->
-        <div id="upload-mode-camera" class="hidden space-y-4">
-          <div class="relative rounded-2xl overflow-hidden bg-[#120E0C] aspect-[4/3] sm:aspect-video border border-[#3A2E26] shadow-2xl flex items-center justify-center select-none">
+        <div id="upload-mode-camera" class="hidden flex-1 flex flex-col space-y-0">
+          <div class="relative rounded-xl sm:rounded-2xl overflow-hidden bg-[#0A0807] flex-1 min-h-[60vh] sm:min-h-[420px] border border-[#3A2E26] shadow-2xl flex items-center justify-center select-none">
             <!-- Live Video Stream -->
             <video id="camera-video-preview" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
 
@@ -609,70 +610,73 @@
             <div id="camera-viewfinder-reticle" class="pointer-events-none absolute inset-0 hidden flex items-center justify-center z-10">
               <div class="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-white/40"></div>
               <div class="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-white/40"></div>
-              <div class="absolute bottom-20 left-4 w-5 h-5 border-b-2 border-l-2 border-white/40"></div>
-              <div class="absolute bottom-20 right-4 w-5 h-5 border-b-2 border-r-2 border-white/40"></div>
+              <div class="absolute bottom-24 left-4 w-5 h-5 border-b-2 border-l-2 border-white/40"></div>
+              <div class="absolute bottom-24 right-4 w-5 h-5 border-b-2 border-r-2 border-white/40"></div>
               <div class="w-6 h-6 border border-white/40 rounded-full opacity-60"></div>
             </div>
 
             <!-- Top HUD Bar: Live Status -->
             <div id="camera-hud-top" class="hidden absolute top-3 inset-x-3 sm:top-4 sm:inset-x-4 flex items-center justify-between z-20 pointer-events-none">
-              <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono tracking-wider text-white">
+              <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono tracking-wider text-white">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="camera-mode-label">LIVE CAMERA</span>
               </div>
               <div class="pointer-events-auto">
-                <button onclick="stopLiveCamera()" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white/80 hover:text-white flex items-center justify-center border border-white/10 text-xs transition active:scale-95" title="Close Camera">
+                <button onclick="stopLiveCamera()" class="w-8 h-8 rounded-full bg-black/70 backdrop-blur-md text-white/80 hover:text-white flex items-center justify-center border border-white/10 text-xs transition active:scale-95" title="Close Camera">
                   ✕
                 </button>
               </div>
             </div>
 
             <!-- Camera Standby / Fallback Placeholder -->
-            <div id="camera-placeholder" class="text-center p-6 space-y-3 z-10 max-w-sm mx-auto">
-              <div class="w-14 h-14 rounded-full bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
-                <svg class="w-7 h-7 text-[#C79A59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-              </div>
-              <p class="text-xs font-mono text-[#D5C3A5]">Camera Ready</p>
-              <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
-                <button onclick="startLiveCamera()" class="px-4 py-2 bg-[#B28242] hover:bg-[#94662B] text-xs font-mono font-semibold text-white rounded-xl shadow-lg transition active:scale-95">
-                  Start Live Camera
-                </button>
-                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1D1713] text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#524136] transition active:scale-95">
-                  Device Camera App
+            <div id="camera-placeholder" class="text-center p-6 space-y-4 z-10 max-w-sm mx-auto">
+              <button onclick="startLiveCamera()" class="group relative flex flex-col items-center justify-center transition active:scale-90 duration-100 mx-auto" title="Start Live Camera">
+                <div class="w-20 h-20 rounded-full border-4 border-[#C79A59] p-1.5 flex items-center justify-center shadow-[0_0_30px_rgba(199,154,89,0.3)] bg-[#2A221C]">
+                  <div class="w-full h-full rounded-full bg-[#B28242] group-hover:bg-[#94662B] flex items-center justify-center shadow-inner transition">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                  </div>
+                </div>
+                <span class="text-[11px] font-mono uppercase tracking-widest text-[#D5C3A5] font-bold mt-2.5">START LIVE CAMERA</span>
+              </button>
+
+              <div class="flex items-center justify-center gap-2 pt-1">
+                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1D1713] text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#524136] transition active:scale-95 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#C79A59]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span>Use Device Camera App</span>
                 </button>
               </div>
             </div>
 
             <!-- Master Camera Controls & Shutter Bar (Live Mode) -->
-            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-0 py-3 sm:py-4 px-6 flex items-center justify-around bg-gradient-to-t from-black/90 via-black/60 to-transparent z-20">
+            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-0 pb-8 pt-4 px-6 flex items-center justify-around bg-gradient-to-t from-black/95 via-black/75 to-transparent z-30">
               <!-- Switch Camera Front/Back -->
-              <button onclick="switchCameraFacingMode()" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/20" title="Flip Camera Front/Back">
+              <button onclick="switchCameraFacingMode()" class="w-12 h-12 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/25" title="Flip Camera Front/Back">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                <span class="text-[8px] font-mono uppercase text-white/70 mt-0.5">Flip</span>
+                <span class="text-[8px] font-mono uppercase text-white/80 mt-0.5 font-bold">FLIP</span>
               </button>
 
               <!-- Classic Circular Hardware Shutter Button -->
               <button id="main-camera-shutter-btn" onclick="captureCameraPlate()" class="group relative flex flex-col items-center justify-center transition active:scale-90 duration-100" title="Take Photo">
-                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-4 border-white/80 p-1 flex items-center justify-center shadow-[0_0_24px_rgba(0,0,0,0.8)] group-hover:border-white transition">
+                <div class="w-20 h-20 rounded-full border-4 border-white/90 p-1.5 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.9)] group-hover:border-white transition">
                   <div class="w-full h-full rounded-full bg-white group-hover:bg-[#FAF6EE] shadow-inner flex items-center justify-center transition duration-100 group-active:scale-95">
-                    <div class="w-3.5 h-3.5 rounded-full border-2 border-[#2A221C]/25 bg-[#FAF6EE]"></div>
+                    <div class="w-4 h-4 rounded-full border-2 border-[#2A221C]/30 bg-rose-600"></div>
                   </div>
                 </div>
-                <span class="text-[9px] font-mono uppercase tracking-widest text-white/90 font-bold drop-shadow mt-1">SHUTTER</span>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-white font-bold drop-shadow mt-1">SHUTTER</span>
               </button>
 
               <!-- Native Camera App Trigger -->
-              <button onclick="document.getElementById('mobile-camera-input').click()" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/20" title="Open Native Camera App">
+              <button onclick="document.getElementById('mobile-camera-input').click()" class="w-12 h-12 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/25" title="Open Native Camera App">
                 <svg class="w-5 h-5 text-[#C79A59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                <span class="text-[8px] font-mono uppercase text-white/70 mt-0.5">App</span>
+                <span class="text-[8px] font-mono uppercase text-[#C79A59] mt-0.5 font-bold">APP</span>
               </button>
             </div>
 
@@ -681,12 +685,13 @@
           </div>
         </div>
 
-        <div id="upload-queue-container" class="space-y-2">
+        <div id="upload-queue-container" class="space-y-2 mt-2">
           <!-- Populated dynamically -->
         </div>
       </div>
 
-      <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between">
+      <!-- Modal Footer (Hidden in Camera Mode) -->
+      <div id="upload-modal-footer" class="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-[#E7DECE] bg-[#FAF6EE] flex items-center justify-between shrink-0">
         <span class="text-[10px] sm:text-xs font-mono text-[#8C7B6D]">STORAGE QUOTA: 80% REMAINING</span>
         <button onclick="closeUploadModal()" class="px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono uppercase tracking-wider bg-[#2A221C] hover:bg-[#1A1410] text-[#EFE7D8] rounded-xl transition">
           Done
@@ -1052,14 +1057,17 @@
       const tabCamera = document.getElementById("upload-tab-camera");
       const modeGallery = document.getElementById("upload-mode-gallery");
       const modeCamera = document.getElementById("upload-mode-camera");
+      const modalFooter = document.getElementById("upload-modal-footer");
 
       if (tab === "gallery") {
         stopLiveCamera();
+        if (modalFooter) modalFooter.classList.remove("hidden");
         tabGallery.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition";
         tabCamera.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition";
         modeGallery.classList.remove("hidden");
         modeCamera.classList.add("hidden");
       } else {
+        if (modalFooter) modalFooter.classList.add("hidden");
         tabCamera.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider font-semibold border-b-2 border-[#B28242] text-[#2A221C] transition";
         tabGallery.className = "px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#7A6B5F] hover:text-[#2A221C] border-b-2 border-transparent transition";
         modeCamera.classList.remove("hidden");
