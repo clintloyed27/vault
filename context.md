@@ -683,4 +683,24 @@ On mobile phone viewports (360px–430px wide, e.g. iPhone & Android devices), c
      - Identified that the developer laptop had an unresponsive primary DNS server configured (`172.16.20.55`) causing an artificial initial 2-second timeout before falling back to `8.8.8.8`.
      - Once DNS is resolved/cached, direct tunnel roundtrips maintain consistent **200ms–260ms** execution times.
 
+---
+
+## 27. Frontend Camera Shutter & Mobile UX Overhaul (October 3, 2026)
+
+### Key Improvements Implemented:
+1. **Classic Circular Hardware Shutter Button (Build #53):**
+   - Implemented standard dual-ring 80px circular camera shutter button with tactile scale feedback.
+   - Added camera lens flip (toggle between front/selfie and rear/environment camera).
+   - Added visual camera flash animation and synthesized mechanical audio shutter click.
+   - Fixed camera hardware stream constraints with graceful fallback to `{ video: true }` across all laptops and mobile devices.
+2. **Mobile Viewport Fullscreen Optimization (Build #54):**
+   - Configured upload modal to expand edge-to-edge (`h-full rounded-none p-0`) on mobile phones, eliminating nested scrollbars and cutoffs.
+   - Set viewfinder to `min-h-[60vh] flex-1` with anchored bottom controls and generous safe-area padding (`pb-8`).
+   - Automatically hidden modal footer in camera mode to allocate 100% vertical space to the viewfinder and shutter button.
+3. **Instant Capture Loading & Auto-Dismiss (Build #55):**
+   - As soon as the shutter is pressed, an immediate `📸 Photo Captured! Storing in datacentre...` loading overlay appears inside the viewfinder while the hardware camera stream disengages.
+   - As soon as the upload completes, the dialogue box turns off immediately (`closeUploadModal()`).
+   - A floating status toast (`✓ Photo Captured! Saved directly to PC 3 datacentre storage`) confirms persistence over the gallery, and the viewport smoothly scrolls to top to reveal the new photo.
+
+
 
