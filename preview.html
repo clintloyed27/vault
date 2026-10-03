@@ -598,32 +598,81 @@
 
         <!-- Camera Mode -->
         <div id="upload-mode-camera" class="hidden space-y-4">
-          <div class="relative rounded-2xl overflow-hidden bg-[#17120F] aspect-[4/3] sm:aspect-video border border-[#3A2E26] flex items-center justify-center">
+          <div class="relative rounded-2xl overflow-hidden bg-[#120E0C] aspect-[4/3] sm:aspect-video border border-[#3A2E26] shadow-2xl flex items-center justify-center select-none">
+            <!-- Live Video Stream -->
             <video id="camera-video-preview" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
 
-            <div id="camera-placeholder" class="text-center p-4 sm:p-6 space-y-3">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <!-- Visual Camera Flash Effect -->
+            <div id="camera-flash-overlay" class="pointer-events-none absolute inset-0 bg-white opacity-0 transition-opacity duration-150 z-30"></div>
+
+            <!-- Viewfinder Crosshairs -->
+            <div id="camera-viewfinder-reticle" class="pointer-events-none absolute inset-0 hidden flex items-center justify-center z-10">
+              <div class="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-white/40"></div>
+              <div class="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-white/40"></div>
+              <div class="absolute bottom-20 left-4 w-5 h-5 border-b-2 border-l-2 border-white/40"></div>
+              <div class="absolute bottom-20 right-4 w-5 h-5 border-b-2 border-r-2 border-white/40"></div>
+              <div class="w-6 h-6 border border-white/40 rounded-full opacity-60"></div>
+            </div>
+
+            <!-- Top HUD Bar: Live Status -->
+            <div id="camera-hud-top" class="hidden absolute top-3 inset-x-3 sm:top-4 sm:inset-x-4 flex items-center justify-between z-20 pointer-events-none">
+              <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono tracking-wider text-white">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="camera-mode-label">LIVE CAMERA</span>
               </div>
-              <p class="text-[11px] sm:text-xs font-mono text-[#A89889]">Optical camera shutter disengaged</p>
-              <div class="flex flex-wrap items-center justify-center gap-2 pt-1 sm:pt-2">
-                <button onclick="startLiveCamera()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#2A221C] hover:bg-[#1D1713] text-[11px] sm:text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#7A5B36] transition">
-                  Start Live Camera
-                </button>
-                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#B28242] hover:bg-[#94662B] text-[11px] sm:text-xs font-mono text-white rounded-xl transition">
-                  Open Device Camera
+              <div class="pointer-events-auto">
+                <button onclick="stopLiveCamera()" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white/80 hover:text-white flex items-center justify-center border border-white/10 text-xs transition active:scale-95" title="Close Camera">
+                  ✕
                 </button>
               </div>
             </div>
 
-            <!-- Live Shutter Overlay -->
-            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-4 flex items-center justify-center gap-3 sm:gap-4 px-4 z-10">
-              <button onclick="captureCameraPlate()" class="flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#FAF6EE] text-[#2A221C] font-mono uppercase tracking-wider text-[11px] sm:text-xs font-bold shadow-2xl hover:bg-white transition active:scale-95 border border-[#8C6D46]">
-                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-600 animate-pulse"></span>
-                <span>Expose Plate</span>
+            <!-- Camera Standby / Fallback Placeholder -->
+            <div id="camera-placeholder" class="text-center p-6 space-y-3 z-10 max-w-sm mx-auto">
+              <div class="w-14 h-14 rounded-full bg-[#2A221C] border border-[#524136] flex items-center justify-center mx-auto text-[#D5C3A5]">
+                <svg class="w-7 h-7 text-[#C79A59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <p class="text-xs font-mono text-[#D5C3A5]">Camera Ready</p>
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <button onclick="startLiveCamera()" class="px-4 py-2 bg-[#B28242] hover:bg-[#94662B] text-xs font-mono font-semibold text-white rounded-xl shadow-lg transition active:scale-95">
+                  Start Live Camera
+                </button>
+                <button onclick="document.getElementById('mobile-camera-input').click()" class="px-4 py-2 bg-[#2A221C] hover:bg-[#1D1713] text-xs font-mono text-[#F4ECE0] rounded-xl border border-[#524136] transition active:scale-95">
+                  Device Camera App
+                </button>
+              </div>
+            </div>
+
+            <!-- Master Camera Controls & Shutter Bar (Live Mode) -->
+            <div id="camera-controls-overlay" class="hidden absolute inset-x-0 bottom-0 py-3 sm:py-4 px-6 flex items-center justify-around bg-gradient-to-t from-black/90 via-black/60 to-transparent z-20">
+              <!-- Switch Camera Front/Back -->
+              <button onclick="switchCameraFacingMode()" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/20" title="Flip Camera Front/Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span class="text-[8px] font-mono uppercase text-white/70 mt-0.5">Flip</span>
               </button>
-              <button onclick="stopLiveCamera()" class="p-2 sm:p-2.5 rounded-full bg-[#17120F]/80 text-[#D5C3A5] hover:text-white border border-[#42342A] transition" title="Stop Camera">
-                ✕
+
+              <!-- Classic Circular Hardware Shutter Button -->
+              <button id="main-camera-shutter-btn" onclick="captureCameraPlate()" class="group relative flex flex-col items-center justify-center transition active:scale-90 duration-100" title="Take Photo">
+                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-4 border-white/80 p-1 flex items-center justify-center shadow-[0_0_24px_rgba(0,0,0,0.8)] group-hover:border-white transition">
+                  <div class="w-full h-full rounded-full bg-white group-hover:bg-[#FAF6EE] shadow-inner flex items-center justify-center transition duration-100 group-active:scale-95">
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-[#2A221C]/25 bg-[#FAF6EE]"></div>
+                  </div>
+                </div>
+                <span class="text-[9px] font-mono uppercase tracking-widest text-white/90 font-bold drop-shadow mt-1">SHUTTER</span>
+              </button>
+
+              <!-- Native Camera App Trigger -->
+              <button onclick="document.getElementById('mobile-camera-input').click()" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex flex-col items-center justify-center transition active:scale-90 border border-white/20" title="Open Native Camera App">
+                <svg class="w-5 h-5 text-[#C79A59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="text-[8px] font-mono uppercase text-white/70 mt-0.5">App</span>
               </button>
             </div>
 
@@ -996,6 +1045,7 @@
 
     // ================= INGESTION (GALLERY & CAMERA) =================
     let cameraStream = null;
+    let currentCameraFacing = "environment"; // "environment" or "user"
 
     function switchUploadTab(tab) {
       const tabGallery = document.getElementById("upload-tab-gallery");
@@ -1018,22 +1068,94 @@
       }
     }
 
-    async function startLiveCamera() {
+    async function startLiveCamera(facing = currentCameraFacing) {
+      currentCameraFacing = facing;
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+
+      const video = document.getElementById("camera-video-preview");
+      const placeholder = document.getElementById("camera-placeholder");
+      const overlay = document.getElementById("camera-controls-overlay");
+      const hudTop = document.getElementById("camera-hud-top");
+      const reticle = document.getElementById("camera-viewfinder-reticle");
+      const modeLabel = document.getElementById("camera-mode-label");
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn("getUserMedia not available in this browser context");
+        placeholder.classList.remove("hidden");
+        video.classList.add("hidden");
+        overlay.classList.add("hidden");
+        if (hudTop) hudTop.classList.add("hidden");
+        if (reticle) reticle.classList.add("hidden");
+        return;
+      }
+
+      let stream = null;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: currentCameraFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
           audio: false
         });
+      } catch (err1) {
+        console.warn("Ideal facing camera unavailable, trying default video input:", err1);
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        } catch (err2) {
+          console.warn("Camera access denied or unavailable:", err2);
+          placeholder.classList.remove("hidden");
+          video.classList.add("hidden");
+          overlay.classList.add("hidden");
+          if (hudTop) hudTop.classList.add("hidden");
+          if (reticle) reticle.classList.add("hidden");
+          return;
+        }
+      }
+
+      if (stream) {
         cameraStream = stream;
-        const video = document.getElementById("camera-video-preview");
         video.srcObject = stream;
         video.classList.remove("hidden");
-        document.getElementById("camera-placeholder").classList.add("hidden");
-        document.getElementById("camera-controls-overlay").classList.remove("hidden");
-      } catch (err) {
-        console.warn("Live camera stream error:", err);
-        alert("Camera preview unavailable or permission denied. You can still use 'Open Device Camera' on mobile.");
+        placeholder.classList.add("hidden");
+        overlay.classList.remove("hidden");
+        if (hudTop) hudTop.classList.remove("hidden");
+        if (reticle) reticle.classList.remove("hidden");
+        if (modeLabel) {
+          modeLabel.textContent = currentCameraFacing === "user" ? "FRONT CAMERA" : "REAR CAMERA";
+        }
       }
+    }
+
+    function switchCameraFacingMode() {
+      const nextFacing = currentCameraFacing === "environment" ? "user" : "environment";
+      startLiveCamera(nextFacing);
+    }
+
+    function playShutterSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(650, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.09);
+      } catch (e) {}
+    }
+
+    function triggerCameraFlash() {
+      const flash = document.getElementById("camera-flash-overlay");
+      if (!flash) return;
+      flash.style.opacity = "0.9";
+      setTimeout(() => { flash.style.opacity = "0"; }, 120);
     }
 
     function stopLiveCamera() {
@@ -1045,8 +1167,12 @@
       if (video) video.classList.add("hidden");
       const placeholder = document.getElementById("camera-placeholder");
       if (placeholder) placeholder.classList.remove("hidden");
-      const controls = document.getElementById("camera-controls-overlay");
-      if (controls) controls.classList.add("hidden");
+      const overlay = document.getElementById("camera-controls-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      const hudTop = document.getElementById("camera-hud-top");
+      if (hudTop) hudTop.classList.add("hidden");
+      const reticle = document.getElementById("camera-viewfinder-reticle");
+      if (reticle) reticle.classList.add("hidden");
     }
 
     async function captureCameraPlate() {
@@ -1058,6 +1184,9 @@
         showAuthStatus("Please sign in or create an account to upload photos.", true);
         return;
       }
+
+      playShutterSound();
+      triggerCameraFlash();
 
       const video = document.getElementById("camera-video-preview");
       const canvas = document.getElementById("camera-capture-canvas");
